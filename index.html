@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#74c9f2">
-<title>Bridge Builder Math — Production Edition</title>
+<title>Bridge Builder Math — Stories Edition</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#071727;
@@ -16,25 +16,35 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .topbar{position:absolute;top:max(10px,env(safe-area-inset-top));
 left:max(10px,env(safe-area-inset-left));
 right:max(10px,env(safe-area-inset-right));
-display:flex;align-items:center;gap:8px;pointer-events:none}
-.pill{flex:0 0 auto;padding:9px 13px;border-radius:16px;background:rgba(255,255,255,.94);
+display:flex;align-items:center;gap:6px;pointer-events:none}
+.pill{flex:0 0 auto;padding:9px 12px;border-radius:16px;background:rgba(255,255,255,.94);
 border:1px solid rgba(255,255,255,.78);box-shadow:0 8px 22px rgba(9,30,48,.16);
-color:#17314b;font-weight:950;font-size:clamp(10px,2.4vw,14px);letter-spacing:.3px;
+color:#17314b;font-weight:950;font-size:clamp(10px,2.3vw,14px);letter-spacing:.3px;
 backdrop-filter:blur(12px);white-space:nowrap}
-.brand{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;max-width:none}
+.brand{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis}
 .level{background:#17314b;color:#fff}
 .stars{background:rgba(255,255,255,.94);color:#b8860b}
-.spacer{flex:1 1 auto}
 .icon{pointer-events:auto;width:40px;height:40px;padding:0;border:0;border-radius:14px;
 background:rgba(255,255,255,.94);color:#17314b;font:950 18px/1 system-ui;cursor:pointer;
 box-shadow:0 8px 22px rgba(9,30,48,.16);flex:0 0 auto}
 .icon:active{transform:translateY(2px)}
 .progress{position:absolute;top:calc(max(10px,env(safe-area-inset-top)) + 52px);
-left:50%;transform:translateX(-50%);width:min(300px,72vw);height:7px;
-background:rgba(23,49,75,.16);border-radius:4px;overflow:hidden;
-box-shadow:inset 0 1px 2px rgba(0,0,0,.08);pointer-events:none}
-.progressFill{height:100%;width:0;background:linear-gradient(90deg,#17314b,#3b6791);
+left:50%;transform:translateX(-50%);width:min(300px,72vw);height:8px;
+background:rgba(23,49,75,.16);border-radius:4px;pointer-events:none;
+box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
+.progressFill{position:relative;height:100%;width:0;
+background:linear-gradient(90deg,#17314b,#3b6791);
 border-radius:4px;transition:width .5s cubic-bezier(.2,.9,.3,1)}
+.progressDot{position:absolute;right:0;top:50%;transform:translate(50%,-50%);
+width:14px;height:14px;border-radius:50%;background:#17314b;border:2.5px solid #fff;
+box-shadow:0 2px 6px rgba(0,0,0,.22)}
+.story{position:absolute;left:50%;transform:translateX(-50%);
+top:calc(max(10px,env(safe-area-inset-top)) + 70px);
+max-width:min(460px,86vw);padding:8px 14px;border-radius:14px;
+background:rgba(23,49,75,.85);color:#fff;font-weight:850;font-size:clamp(11px,2.7vw,13px);
+text-align:center;transition:.4s;opacity:0;pointer-events:none;
+backdrop-filter:blur(6px);box-shadow:0 6px 20px rgba(9,30,48,.18)}
+.story.show{opacity:1}
 .tip{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));
 transform:translateX(-50%);padding:10px 15px;border-radius:15px;
 background:rgba(255,255,255,.9);color:#36566c;font-size:clamp(11px,1.7vw,14px);
@@ -43,24 +53,74 @@ transition:.4s;max-width:92vw;text-align:center;pointer-events:none}
 .tip.gone{opacity:0}
 
 .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;
-background:rgba(8,25,45,.48);backdrop-filter:blur(10px);pointer-events:auto;z-index:20}
+background:rgba(8,25,45,.55);backdrop-filter:blur(10px);pointer-events:auto;z-index:20;
+overflow-y:auto}
 .hidden{display:none!important}
-.modal{width:min(560px,92vw);padding:clamp(22px,5vw,40px);border-radius:28px;
+.modal{width:min(560px,92vw);padding:clamp(20px,4.5vw,36px);border-radius:28px;
 background:#fffaf0;text-align:center;box-shadow:0 30px 100px rgba(0,0,0,.32);
-color:#17314b;animation:pop .38s cubic-bezier(.2,1.35,.35,1)}
+color:#17314b;animation:pop .38s cubic-bezier(.2,1.35,.35,1);margin:auto}
 @keyframes pop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
 .mark{font-size:clamp(40px,10vw,72px);line-height:1;margin-bottom:8px}
-.modal h1{margin:0;font-size:clamp(26px,6.5vw,48px);line-height:1.04}
-.modal p{margin:12px auto 18px;max-width:440px;color:#536b7d;font-weight:750;line-height:1.45;font-size:clamp(13px,3.2vw,16px)}
+.modal h1{margin:0 0 4px;font-size:clamp(24px,6vw,42px);line-height:1.04}
+.modal h2{margin:0 0 10px;font-size:clamp(20px,5vw,28px)}
+.modal p{margin:10px auto 16px;max-width:440px;color:#536b7d;font-weight:700;
+line-height:1.5;font-size:clamp(13px,3.2vw,15px)}
 .cta{border:0;border-radius:17px;padding:14px 26px;background:#17314b;color:#fff;
-font:inherit;font-weight:950;box-shadow:0 7px 0 #0a1827;cursor:pointer;font-size:clamp(14px,3.5vw,17px)}
+font:inherit;font-weight:950;box-shadow:0 7px 0 #0a1827;cursor:pointer;
+font-size:clamp(14px,3.5vw,16px);margin:5px 4px;transition:transform .1s}
 .cta:active{transform:translateY(4px);box-shadow:0 3px 0 #0a1827}
-.secondary{background:#e7eef3;color:#17314b;box-shadow:0 6px 0 #b9c8d1;margin-left:8px}
-.stats{display:flex;justify-content:center;gap:18px;margin:14px 0 18px;font-weight:950}
-.stat b{font-size:clamp(18px,5vw,24px)}
-.stat small{display:block;color:#718391;font-size:clamp(10px,2.6vw,12px);margin-top:2px}
-.worldBadge{display:inline-block;padding:7px 12px;border-radius:999px;background:#e8f3f7;
-font-weight:950;margin-bottom:10px;font-size:clamp(11px,3vw,14px)}
+.secondary{background:#e7eef3;color:#17314b;box-shadow:0 6px 0 #b9c8d1}
+.ghost{background:transparent;color:#536b7d;box-shadow:none;text-decoration:underline;
+font-weight:800}
+.ghost:active{transform:none;box-shadow:none}
+
+.stats{display:flex;justify-content:center;gap:16px;margin:14px 0 18px;font-weight:950;
+flex-wrap:wrap}
+.stat b{font-size:clamp(16px,4.5vw,22px)}
+.stat small{display:block;color:#718391;font-size:clamp(10px,2.4vw,11px);margin-top:2px}
+
+.nameRow{display:flex;gap:8px;align-items:center;justify-content:center;margin:12px 0}
+.nameInput{flex:1;max-width:280px;padding:12px 14px;border-radius:14px;border:2px solid #d9e2e8;
+background:#fff;font:inherit;font-weight:850;font-size:16px;color:#17314b;text-align:center}
+.nameInput:focus{outline:0;border-color:#17314b}
+
+.colorRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0 16px}
+.swatch{width:44px;height:44px;border-radius:50%;border:3px solid #fff;
+box-shadow:0 4px 12px rgba(9,30,48,.18);cursor:pointer;transition:transform .15s}
+.swatch.selected{transform:scale(1.15);border-color:#17314b}
+.swatch:active{transform:scale(1.05)}
+
+.settingRow{display:flex;justify-content:space-between;align-items:center;
+padding:12px 4px;border-bottom:1px solid #e7eef3;font-weight:850;
+font-size:clamp(13px,3.2vw,15px);gap:12px}
+.settingRow:last-child{border-bottom:0}
+.toggle{position:relative;width:52px;height:30px;border-radius:15px;background:#d9e2e8;
+cursor:pointer;transition:background .2s;flex:0 0 auto;border:0}
+.toggle.on{background:#17314b}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;
+border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);
+transition:left .2s}
+.toggle.on::after{left:25px}
+.slider{-webkit-appearance:none;appearance:none;width:120px;height:8px;border-radius:4px;
+background:#d9e2e8;outline:0}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;
+border-radius:50%;background:#17314b;cursor:pointer}
+.slider::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;
+background:#17314b;cursor:pointer}
+
+.contrast-mode{--bg:#000;--panel:#000;--text:#fff}
+body.contrast .overlay{background:rgba(0,0,0,.94)}
+body.contrast .modal{background:#000;color:#fff;border:3px solid #fff}
+body.contrast .modal p{color:#ddd}
+body.contrast .cta{background:#fff;color:#000;box-shadow:0 7px 0 #666}
+body.contrast .pill{background:#000;color:#fff;border:2px solid #fff}
+body.contrast .nameInput{background:#000;color:#fff;border-color:#fff}
+
+/* Larger text mode */
+body.bigtext .modal h1{font-size:clamp(28px,7.5vw,50px)}
+body.bigtext .modal p{font-size:clamp(15px,3.8vw,18px)}
+
+@media (max-width:380px){.brand{font-size:10px}.pill{padding:8px 10px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -69,55 +129,151 @@ font-weight:950;margin-bottom:10px;font-size:clamp(11px,3vw,14px)}
 <canvas id="game" aria-label="Bridge Builder Math"></canvas>
 <div class="hud">
   <div class="topbar">
-    <div class="pill brand">BRIDGE BUILDER MATH</div>
-    <div class="pill level" id="level">1/100</div>
+    <div class="pill brand" id="brandName">BRIDGE BUILDER MATH</div>
+    <div class="pill level" id="level">W1 · 1/20</div>
     <div class="pill stars" id="starsHUD">★ 0</div>
     <button class="icon" id="sound" aria-label="Toggle sound">🔊</button>
     <button class="icon" id="pause" aria-label="Pause">Ⅱ</button>
   </div>
-  <div class="progress"><div class="progressFill" id="progressFill"></div></div>
+  <div class="progress"><div class="progressFill" id="progressFill"><div class="progressDot"></div></div></div>
+  <div class="story" id="story"></div>
   <div class="tip" id="tip">Tap an answer — or drag it onto the bridge.</div>
 </div>
 
-<div class="overlay" id="start">
+<!-- ONBOARDING -->
+<div class="overlay" id="onboard">
  <div class="modal">
   <div class="mark">🌉</div>
-  <div class="worldBadge" id="startWorld">🌿 MEADOW TRAIL</div>
-  <h1>Build the Bridge</h1>
-  <p>Solve the math, choose the right answer, and build a path across five worlds. Progress saves automatically.</p>
-  <div class="stats">
-    <div class="stat"><b id="savedLevel">1</b><small>Level</small></div>
-    <div class="stat"><b id="savedStars">0</b><small>Stars</small></div>
-    <div class="stat"><b>100</b><small>Levels</small></div>
+  <h1>Bridge Builder</h1>
+  <p>Help <b>Pip</b> reach <b>Luna</b> on the other side of the valley.<br>Solve the math to build the bridge.</p>
+  <div class="nameRow">
+    <input class="nameInput" id="nameInput" maxlength="12" placeholder="Your name" aria-label="Your name">
   </div>
-  <button class="cta" id="startBtn">Start Adventure</button>
-  <button class="cta secondary" id="resetBtn">Reset</button>
+  <p style="margin:6px 0 4px;font-size:12px;color:#718391">Pick a bridge color</p>
+  <div class="colorRow" id="colorRow"></div>
+  <button class="cta" id="onboardBtn">Begin the journey</button>
+  <button class="cta ghost" id="settingsFromOnboard">Settings</button>
  </div>
 </div>
 
+<!-- HOME / VILLAGE -->
+<div class="overlay hidden" id="home">
+ <div class="modal">
+  <div class="mark" id="homeMark">🏡</div>
+  <div class="worldBadge" id="homeWorld" style="display:inline-block;padding:7px 12px;
+       border-radius:999px;background:#e8f3f7;font-weight:950;margin-bottom:10px;
+       font-size:clamp(11px,3vw,14px)">🌿 MEADOW TRAIL</div>
+  <h1 id="homeTitle">The village grows</h1>
+  <p id="homeText">Pip has crossed <b>0</b> bridges. Every bridge adds to the village.</p>
+  <div class="stats">
+    <div class="stat"><b id="homeStars">0</b><small>Stars</small></div>
+    <div class="stat"><b id="homeBridges">0</b><small>Bridges</small></div>
+    <div class="stat"><b id="homeSessions">0</b><small>Sessions</small></div>
+  </div>
+  <button class="cta" id="homePlay">Continue the journey</button>
+  <button class="cta ghost" id="homeSettings">Settings</button>
+  <button class="cta ghost" id="homeParent">Parent/Teacher</button>
+ </div>
+</div>
+
+<!-- SESSION INTRO -->
+<div class="overlay hidden" id="sessionIntro">
+ <div class="modal">
+  <div class="mark">🌉</div>
+  <h1 id="sessionTitle">5 bridges to cross</h1>
+  <p id="sessionText">Help Pip reach the other side. Take your time — you can try again.</p>
+  <button class="cta" id="sessionGo">Let's go</button>
+ </div>
+</div>
+
+<!-- SESSION SUMMARY (parent layer + child reward) -->
+<div class="overlay hidden" id="sessionSummary">
+ <div class="modal">
+  <div class="mark">🎉</div>
+  <h1 id="summaryTitle">You did it!</h1>
+  <p id="summaryText">Five more bridges. The village is growing.</p>
+  <div class="stats" style="margin-bottom:6px">
+    <div class="stat"><b id="sumCorrect">0</b><small>Correct</small></div>
+    <div class="stat"><b id="sumStars">0</b><small>Stars earned</small></div>
+    <div class="stat"><b id="sumTime">0s</b><small>Time</small></div>
+  </div>
+  <p id="sumConcepts" style="font-size:12px;color:#718391;margin:2px 0 12px"></p>
+  <button class="cta" id="summaryHome">Back to village</button>
+  <button class="cta ghost" id="summaryDetails">See details</button>
+ </div>
+</div>
+
+<!-- PARENT VIEW -->
+<div class="overlay hidden" id="parentView">
+ <div class="modal" style="text-align:left">
+  <h1 style="text-align:center;margin-bottom:14px">Progress</h1>
+  <div id="parentBody" style="font-size:14px;line-height:1.65;color:#17314b"></div>
+  <div style="text-align:center;margin-top:16px">
+    <button class="cta" id="parentClose">Close</button>
+  </div>
+ </div>
+</div>
+
+<!-- FINISH -->
 <div class="overlay hidden" id="finish">
  <div class="modal">
-  <div class="mark">🏆</div><h1>Bridge Builder!</h1>
+  <div class="mark">🏆</div><h1>Bridge Master!</h1>
   <p id="finishText">You crossed all five worlds.</p>
   <div class="stats">
     <div class="stat"><b id="finalStars">0</b><small>Stars</small></div>
-    <div class="stat"><b>100</b><small>Levels</small></div>
+    <div class="stat"><b>100</b><small>Bridges</small></div>
   </div>
   <button class="cta" id="againBtn">Play Again</button>
  </div>
 </div>
 
+<!-- PAUSE -->
 <div class="overlay hidden" id="pausePanel">
- <div class="modal"><div class="mark">⏸️</div><h1>Paused</h1><p>Your bridge is waiting.</p>
- <button class="cta" id="resumeBtn">Continue</button></div>
+ <div class="modal">
+  <div class="mark">⏸️</div><h1>Paused</h1>
+  <p>Your bridge is waiting.</p>
+  <button class="cta" id="resumeBtn">Continue</button>
+  <button class="cta ghost" id="pauseSettings">Settings</button>
+ </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="overlay hidden" id="settingsPanel">
+ <div class="modal" style="text-align:left">
+  <h1 style="text-align:center;margin-bottom:10px">Settings</h1>
+  <div class="settingRow">
+    <span>Narration</span><button class="toggle" id="setNarration"></button>
+  </div>
+  <div class="settingRow">
+    <span>Reduced motion</span><button class="toggle" id="setReduced"></button>
+  </div>
+  <div class="settingRow">
+    <span>High contrast</span><button class="toggle" id="setContrast"></button>
+  </div>
+  <div class="settingRow">
+    <span>Larger text</span><button class="toggle" id="setBigText"></button>
+  </div>
+  <div class="settingRow">
+    <span>Slower pace</span><button class="toggle" id="setSlow"></button>
+  </div>
+  <div class="settingRow">
+    <span>Volume</span><input type="range" class="slider" id="setVolume" min="0" max="100" value="60">
+  </div>
+  <div style="text-align:center;margin-top:16px">
+    <button class="cta" id="settingsClose">Done</button>
+  </div>
+ </div>
 </div>
 </div>
 
 <script>
 (()=>{"use strict";
 
+// ═══════════════════════════════════════════════════════════════════
+//  CANVAS
+// ═══════════════════════════════════════════════════════════════════
 const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d", { alpha: false });
+const ctx = canvas.getContext("2d", { alpha:false });
 const app = document.getElementById("app");
 let W = 0, H = 0, DPR = 1, S = 1, ox = 0, oy = 0, portrait = false, last = performance.now();
 
@@ -125,7 +281,7 @@ const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const ease = t => 1 - Math.pow(1 - t, 3);
-const smooth = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const smooth = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2;
 const rnd = (a, b) => a + Math.random() * (b - a);
 function shuffle(a){
   const r = a.slice();
@@ -136,43 +292,91 @@ function shuffle(a){
   return r;
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  WORLDS (each with signature effect & palette)
+// ═══════════════════════════════════════════════════════════════════
 const WORLDS = [
-  { name:"MEADOW TRAIL",       icon:"🌿", sky:["#58b9e8","#b9e4f2","#ffe1a7"], ground:["#8fd39a","#4d9959"], accent:"#ffd85f" },
-  { name:"SUNSET CANYON",      icon:"🏜️", sky:["#ef9b76","#f7c17d","#ffe7b2"], ground:["#c99a62","#87563a"], accent:"#ffe18a" },
-  { name:"MOONLIGHT MOUNTAINS",icon:"🌙", sky:["#273d76","#607eb1","#b4c4df"], ground:["#709b8b","#3d665c"], accent:"#dbe8ff" },
-  { name:"CRYSTAL COAST",      icon:"💎", sky:["#3dc8d5","#8de6df","#e9f5cf"], ground:["#91cfae","#438d76"], accent:"#ffffff" },
-  { name:"SKY KINGDOM",        icon:"☁️", sky:["#6c79df","#b7b9f0","#f9d4e8"], ground:["#a7b8e6","#6574b0"], accent:"#ffe58a" }
+  { name:"MEADOW TRAIL", icon:"🌿",
+    sky:["#58b9e8","#b9e4f2","#ffe1a7"], ground:["#8fd39a","#4d9959"],
+    accent:"#ffd85f", effect:"fireflies",
+    amb:[220, 275, 330] },
+  { name:"SUNSET CANYON", icon:"🏜️",
+    sky:["#ef9b76","#f7c17d","#ffe7b2"], ground:["#c99a62","#87563a"],
+    accent:"#ffe18a", effect:"dust",
+    amb:[196, 245, 294] },
+  { name:"MOONLIGHT MOUNTAINS", icon:"🌙",
+    sky:["#273d76","#607eb1","#b4c4df"], ground:["#709b8b","#3d665c"],
+    accent:"#dbe8ff", effect:"snow",
+    amb:[174, 220, 261] },
+  { name:"CRYSTAL COAST", icon:"💎",
+    sky:["#3dc8d5","#8de6df","#e9f5cf"], ground:["#91cfae","#438d76"],
+    accent:"#ffffff", effect:"waves",
+    amb:[233, 277, 330] },
+  { name:"SKY KINGDOM", icon:"☁️",
+    sky:["#6c79df","#b7b9f0","#f9d4e8"], ground:["#a7b8e6","#6574b0"],
+    accent:"#ffe58a", effect:"islands",
+    amb:[261, 311, 370] }
 ];
+
+// ═══════════════════════════════════════════════════════════════════
+//  LEVEL GENERATION (6 mechanic types)
+// ═══════════════════════════════════════════════════════════════════
+function mkAdd(i){
+  const a = 1 + (i % 6), b = 1 + ((i * 3) % 7);
+  return { type:"add", a, b, ans:a+b };
+}
+function mkSub(i){
+  const a = 10 + (i % 11);
+  let b = 1 + ((i * 5) % Math.max(2, a - 1));
+  if (b >= a) b = a - 1;
+  return { type:"sub", a, b, ans:a - b };
+}
+function mkMissing(i){
+  const a = 1 + (i % 5);
+  const b = 2 + (i % 6);
+  const c = a + b;
+  return { type:"missing", a, c, b, ans:b };
+}
+function mkMul(i){
+  const a = 2 + (i % 6), b = 2 + ((i * 3) % 6);
+  return { type:"mul", a, b, ans:a*b };
+}
+function mkDiv(i){
+  const b = 2 + (i % 6);
+  const ans = 2 + ((i * 3 + 1) % 6);
+  return { type:"div", a:b * ans, b, ans };
+}
+function mkCompare(i){
+  const a = 1 + (i % 5), b = 2 + ((i * 3) % 5);
+  let c = 1 + ((i * 2) % 5), d = 2 + ((i * 5) % 5);
+  if (a + b === c + d) d += 1;
+  return { type:"compare", pairs:[[a,b],[c,d]],
+           ans: (a+b) > (c+d) ? "L" : "R" };
+}
+function mkMixed(i){
+  const m = i % 4;
+  if (m === 0) return mkAdd(i);
+  if (m === 1) return mkSub(i);
+  if (m === 2) return mkMul(i);
+  return mkDiv(i);
+}
 
 function makeLevels(){
   const L = [];
-  for (let i = 0; i < 20; i++){
-    const a = 1 + (i % 6), b = 1 + ((i * 3) % 7);
-    L.push({ w:0, type:"add", a, b, ans:a + b });
+  for (let w = 0; w < 5; w++){
+    for (let i = 0; i < 20; i++){
+      let q;
+      if (w === 0) q = mkAdd(i);
+      else if (w === 1) q = mkSub(i);
+      else if (w === 2) q = (i % 3 === 0) ? mkMissing(i) : mkMul(i);
+      else if (w === 3) q = (i % 3 === 0) ? mkCompare(i) : mkDiv(i);
+      else q = (i % 5 === 0) ? mkCompare(i) : mkMixed(i);
+      q.w = w;
+      q.n = w * 20 + i;
+      L.push(q);
+    }
   }
-  for (let i = 0; i < 20; i++){
-    let a = 10 + (i % 11);
-    let b = 1 + ((i * 5) % Math.max(2, a - 1));
-    if (b >= a) b = a - 1;
-    L.push({ w:1, type:"sub", a, b, ans:a - b });
-  }
-  for (let i = 0; i < 20; i++){
-    const a = 2 + (i % 8), b = 2 + ((i * 3) % 8);
-    L.push({ w:2, type:"mul", a, b, ans:a * b });
-  }
-  for (let i = 0; i < 20; i++){
-    const b = 2 + (i % 8);
-    const ans = 2 + ((i * 3 + 1) % 8);
-    L.push({ w:3, type:"div", a:b * ans, b, ans });
-  }
-  for (let i = 0; i < 20; i++){
-    const m = i % 4;
-    if (m === 0){ const a = 8 + (i % 9), b = 2 + (i % 7); L.push({ w:4, type:"add", a, b, ans:a + b }); }
-    else if (m === 1){ const a = 18 + (i % 13), b = 3 + (i % 9); L.push({ w:4, type:"sub", a, b, ans:a - b }); }
-    else if (m === 2){ const a = 3 + (i % 7), b = 2 + (i % 8); L.push({ w:4, type:"mul", a, b, ans:a * b }); }
-    else { const b = 2 + (i % 7), ans = 3 + (i % 7); L.push({ w:4, type:"div", a:b * ans, b, ans }); }
-  }
-  return L.map((q, i) => ({ ...q, n:i + 1 }));
+  return L;
 }
 const levels = makeLevels();
 
@@ -180,55 +384,119 @@ function label(q){
   if (q.type === "add") return `${q.a} + ${q.b} = ?`;
   if (q.type === "sub") return `${q.a} − ${q.b} = ?`;
   if (q.type === "mul") return `${q.a} × ${q.b} = ?`;
-  return `${q.a} ÷ ${q.b} = ?`;
+  if (q.type === "div") return `${q.a} ÷ ${q.b} = ?`;
+  if (q.type === "missing") return `${q.a} + ? = ${q.c}`;
+  if (q.type === "compare") return `Which is more?`;
+  return "";
 }
+function conceptTag(q){
+  if (q.type === "add") return "addition within 20";
+  if (q.type === "sub") return "subtraction within 20";
+  if (q.type === "mul") return "multiplication tables 2–8";
+  if (q.type === "div") return "division facts";
+  if (q.type === "missing") return "missing addend";
+  if (q.type === "compare") return "comparing sums";
+  return "";
+}
+
 function choices(q){
-  const d = q.ans < 15 ? 1 : 2;
-  const set = new Set([q.ans]);
-  for (const v of [q.ans - d, q.ans + d, q.ans - 1, q.ans + 1, q.ans - 2, q.ans + 2]){
+  if (q.type === "compare") return ["L", "R"];
+  const ans = q.ans;
+  const d = ans < 15 ? 1 : 2;
+  const set = new Set([ans]);
+  for (const v of [ans - d, ans + d, ans - 1, ans + 1, ans - 2, ans + 2]){
     if (v >= 0 && set.size < 3) set.add(v);
   }
   let k = 3;
-  while (set.size < 3){ if (!set.has(k) && k !== q.ans) set.add(k); k++; }
+  while (set.size < 3){ if (!set.has(k) && k !== ans) set.add(k); k++; }
   return shuffle([...set]);
 }
 
-const SAVE_KEY = "bbm-production-v3";
-let save = { level:0, stars:0, best:Array(100).fill(0) };
+// ═══════════════════════════════════════════════════════════════════
+//  PERSISTENCE
+// ═══════════════════════════════════════════════════════════════════
+const SAVE_KEY = "bbm-stories-v1";
+let save = {
+  name: "",
+  color: "#d99a5b",
+  level: 0,
+  stars: 0,
+  best: Array(100).fill(0),
+  bridges: 0,
+  sessions: 0,
+  settings: {
+    narration: false,
+    reduced: false,
+    contrast: false,
+    bigText: false,
+    slow: false,
+    volume: 60
+  },
+  log: []   // per-session records for parent view
+};
 try{
   const s = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
   if (s){
-    save.level = clamp(+s.level || 0, 0, 99);
-    save.stars = +s.stars || 0;
-    save.best = Array.isArray(s.best)
-      ? s.best.concat(Array(100).fill(0)).slice(0, 100)
-      : save.best;
+    save = { ...save, ...s, settings: { ...save.settings, ...(s.settings||{}) } };
+    if (!Array.isArray(save.best) || save.best.length !== 100)
+      save.best = (save.best || []).concat(Array(100).fill(0)).slice(0, 100);
   }
 }catch(e){}
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
 
+// Bridge colour palette
+const BRIDGE_COLORS = [
+  "#d99a5b", "#a35b8f", "#5b9aa3", "#c96d6d",
+  "#7b6fc4", "#6fa35c", "#c4a04e", "#4d6f8c"
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
 const state = {
-  phase:"START", level:save.level, drag:null,
-  buildTimer:0, walkTimer:0, transitionToken:0,
-  reduced:matchMedia("(prefers-reduced-motion: reduce)").matches,
-  attempts:0
+  phase: "ONBOARD",     // ONBOARD | HOME | SESSION_INTRO | READY | DRAG | BUILDING | CROSSING | CHEERING | SUMMARY | PAUSED | FINISH
+  level: save.level,
+  sessionStartLevel: 0,
+  sessionStartTime: 0,
+  sessionCorrect: 0,
+  sessionStarsEarned: 0,
+  sessionAttempts: 0,
+  sessionConcepts: {},
+  drag: null,
+  buildTimer: 0,
+  walkTimer: 0,
+  transitionToken: 0,
+  attempts: 0,
+  helpShown: false,
+  consecutiveCorrect: 0,
+  currentSession: 0
 };
 
-let clouds = [], particles = [], planks = [], cards = [];
-const hero = { x:0, phase:0, blink:1, blinkT:2, state:"idle", cheer:0 };
+let clouds = [], particles = [], planks = [], cards = [], worldFx = [];
+const hero = { x:0, phase:0, blink:1, blinkT:2, state:"idle", cheer:0,
+               personalityTimer: 0, react: null };
+const friend = { x:0, wave:0, bounce:0 };
 
+// ═══════════════════════════════════════════════════════════════════
+//  AUDIO — SFX + per-world ambient + optional narration
+// ═══════════════════════════════════════════════════════════════════
 const AudioFX = (() => {
-  let ac = null, gain = null, muted = false;
+  let ac = null, master = null, muted = false, ambientGain = null, ambientOscs = [];
   function ensure(){
     if (ac) return ac;
     try{
       ac = new (window.AudioContext || window.webkitAudioContext)();
-      gain = ac.createGain(); gain.gain.value = .42; gain.connect(ac.destination);
+      master = ac.createGain();
+      master.gain.value = (save.settings.volume||60)/100 * .7;
+      master.connect(ac.destination);
+      ambientGain = ac.createGain();
+      ambientGain.gain.value = 0;
+      ambientGain.connect(master);
     }catch(e){}
     return ac;
   }
   function wake(){ const a = ensure(); if (a && a.state === "suspended") a.resume(); }
-  function tone(f, d, type = "sine", v = .1, delay = 0){
+  function tone(f, d, type="sine", v=.1, delay=0){
     if (muted) return;
     const a = ensure(); if (!a) return;
     const t = a.currentTime + delay;
@@ -237,125 +505,192 @@ const AudioFX = (() => {
     g.gain.setValueAtTime(.0001, t);
     g.gain.exponentialRampToValueAtTime(v, t + .008);
     g.gain.exponentialRampToValueAtTime(.0001, t + d);
-    o.connect(g).connect(gain);
+    o.connect(g).connect(master);
     o.start(t); o.stop(t + d + .03);
   }
-  function noise(d = .07, v = .08, cut = 1000){
+  function noise(d=.07, v=.08, cut=1000){
     if (muted) return;
     const a = ensure(); if (!a) return;
-    const b = a.createBuffer(1, Math.max(1, a.sampleRate * d), a.sampleRate);
+    const b = a.createBuffer(1, Math.max(1, a.sampleRate*d), a.sampleRate);
     const x = b.getChannelData(0);
-    for (let i = 0; i < x.length; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / x.length);
+    for (let i=0;i<x.length;i++) x[i] = (Math.random()*2-1) * (1 - i/x.length);
     const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
     s.buffer = b; f.type = "lowpass"; f.frequency.value = cut; g.gain.value = v;
-    s.connect(f).connect(g).connect(gain);
+    s.connect(f).connect(g).connect(master);
     s.start(); s.stop(a.currentTime + d);
+  }
+  function stopAmbient(){
+    ambientOscs.forEach(o => { try{ o.stop(); }catch(e){} });
+    ambientOscs = [];
+    if (ambientGain) ambientGain.gain.linearRampToValueAtTime(0, (ac?ac.currentTime:0) + .6);
+  }
+  function startAmbient(freqs){
+    const a = ensure(); if (!a) return;
+    stopAmbient();
+    const g = a.createGain();
+    g.gain.value = 0;
+    g.connect(ambientGain);
+    g.gain.linearRampToValueAtTime(1, a.currentTime + 1.5);
+    freqs.forEach((f, i) => {
+      const o = a.createOscillator();
+      o.type = i % 2 ? "sine" : "triangle";
+      o.frequency.value = f;
+      const og = a.createGain();
+      og.gain.value = .08 / (i + 1);
+      o.connect(og).connect(g);
+      // slow vibrato
+      const lfo = a.createOscillator();
+      lfo.frequency.value = .1 + i * .07;
+      const lfoG = a.createGain();
+      lfoG.gain.value = 1.5;
+      lfo.connect(lfoG).connect(o.frequency);
+      o.start(); lfo.start();
+      ambientOscs.push(o, lfo);
+    });
+  }
+  function narrate(text, rate){
+    if (!save.settings.narration || muted) return;
+    if (!("speechSynthesis" in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = rate || (save.settings.slow ? 0.8 : 0.95);
+      u.pitch = 1.15;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
   }
   return {
     wake,
-    toggle(){ muted = !muted; if (gain) gain.gain.value = muted ? 0 : .42; return muted; },
+    setVolume(v){ if (master) master.gain.value = muted ? 0 : (v/100)*.7; },
+    toggle(){ muted = !muted; if (master) master.gain.value = muted ? 0 : (save.settings.volume/100)*.7; return muted; },
     pickup(){ tone(620, .08, "triangle", .1); tone(880, .06, "triangle", .05, .035); },
     drop(){ noise(.06, .08, 900); },
     wrong(){ tone(220, .13, "sine", .08); tone(165, .17, "sine", .05, .05); },
     snap(){ noise(.09, .16, 2200); tone(250, .14, "triangle", .14); tone(370, .11, "sine", .08, .03); },
     step(){ noise(.03, .028, 700); },
-    complete(){ [392, 523, 659, 784].forEach((f, i) => tone(f, .7, "sine", .12, i * .07)); },
-    start(){ tone(523, .1, "triangle", .08); tone(659, .15, "triangle", .06, .07); },
-    star(){ tone(784, .12, "triangle", .1); tone(1046, .18, "sine", .07, .06); }
+    complete(){ [392,523,659,784].forEach((f,i)=>tone(f,.7,"sine",.12,i*.07)); },
+    start(){ tone(523,.1,"triangle",.08); tone(659,.15,"triangle",.06,.07); },
+    star(){ tone(784,.12,"triangle",.1); tone(1046,.18,"sine",.07,.06); },
+    wave(){ tone(392,.15,"triangle",.08); tone(587,.2,"sine",.06,.08); },
+    help(){ tone(330,.15,"sine",.06); tone(440,.15,"sine",.05,.1); },
+    startAmbient, stopAmbient,
+    narrate
   };
 })();
 
-// ─── WORLD ───
-function world(){
-  // portrait world is taller relative to width, matching modern phones
-  return portrait ? { w:440, h:900 } : { w:1280, h:720 };
-}
-
+// ═══════════════════════════════════════════════════════════════════
+//  WORLD LAYOUT
+// ═══════════════════════════════════════════════════════════════════
+function world(){ return portrait ? { w:440, h:900 } : { w:1280, h:720 }; }
 function layout(){
   const z = world();
-  // Cards always fit inside world width with 20px side padding.
   const n = 3;
   const gap = portrait ? 10 : 18;
   const maxTotal = z.w - 40;
   const cardW = Math.min(portrait ? 128 : 150,
                         Math.floor((maxTotal - (n - 1) * gap) / n));
   const cardH = Math.round(cardW * 0.7);
-
   if (portrait){
     return {
-      groundY:660,
-      ravineX1:110, ravineX2:330,
-      bridgeX1:100, bridgeX2:340, deck:24,
-      charStart:48, charEnd:400,
-      eqY:170, eqH:78,
-      trayY:300, cardW, cardH, gap,
-      tipY:600,
-      cardFont: Math.round(cardW * 0.52)
+      groundY: 660,
+      ravineX1: 90, ravineX2: 350,
+      bridgeX1: 80, bridgeX2: 360, deck: 32,
+      charStart: 40, charEnd: 400,
+      friendX: 410,
+      eqY: 170, eqH: 78,
+      trayY: 300, cardW, cardH, gap,
+      cardFont: Math.round(cardW * 0.52),
+      villageX: 410, villageY: 660
     };
   }
   return {
-    groundY:520,
-    ravineX1:410, ravineX2:870,
-    bridgeX1:390, bridgeX2:890, deck:28,
-    charStart:165, charEnd:1115,
-    eqY:46, eqH:92,
-    trayY:160, cardW, cardH, gap,
-    tipY:620,
-    cardFont: Math.round(cardW * 0.48)
+    groundY: 520,
+    ravineX1: 400, ravineX2: 880,
+    bridgeX1: 380, bridgeX2: 900, deck: 36,
+    charStart: 150, charEnd: 1130,
+    friendX: 1180,
+    eqY: 46, eqH: 92,
+    trayY: 160, cardW, cardH, gap,
+    cardFont: Math.round(cardW * 0.48),
+    villageX: 1160, villageY: 520
   };
 }
 
 function X(x){ return ox + x * S; }
 function Y(y){ return oy + y * S; }
 function R(v){ return v * S; }
-function pos(e){ return { x:(e.clientX - ox) / S, y:(e.clientY - oy) / S }; }
+function pos(e){ return { x:(e.clientX - ox)/S, y:(e.clientY - oy)/S }; }
 
-// ─── RESIZE ─── uses #app rect, immune to 100vw/visualViewport drift
+// ═══════════════════════════════════════════════════════════════════
+//  RESIZE + REFLOW
+// ═══════════════════════════════════════════════════════════════════
 function resize(){
   const r = app.getBoundingClientRect();
   const vw = window.visualViewport ? window.visualViewport.width  : r.width;
   const vh = window.visualViewport ? window.visualViewport.height : r.height;
-  W = Math.max(1, Math.round(Math.min(r.width,  vw)));
+  W = Math.max(1, Math.round(Math.min(r.width, vw)));
   H = Math.max(1, Math.round(Math.min(r.height, vh)));
   portrait = H > W * 1.02;
   DPR = Math.min(2, window.devicePixelRatio || 1);
-
-  canvas.width  = Math.round(W * DPR);
-  canvas.height = Math.round(H * DPR);
-  canvas.style.width  = W + "px";
+  canvas.width = Math.round(W*DPR);
+  canvas.height = Math.round(H*DPR);
+  canvas.style.width = W + "px";
   canvas.style.height = H + "px";
-
   const z = world();
-  S = Math.min(W / z.w, H / z.h);
-  ox = (W - z.w * S) / 2;
-  oy = (H - z.h * S) / 2;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
+  S = Math.min(W/z.w, H/z.h);
+  ox = (W - z.w*S)/2;
+  oy = (H - z.h*S)/2;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
   makeClouds();
+  makeWorldFx();
   reflow();
 }
-
 function makeClouds(){
   const z = world();
-  const n = portrait ? 8 : 12;
+  const n = portrait ? 7 : 11;
   clouds = Array.from({ length:n }, (_, i) => ({
-    x: -100 + i * (z.w + 180) / n,
-    y: 55 + (i * 37) % 220,
-    s: .62 + (i % 5) * .14,
-    v: 4 + (i % 7) * 1.2
+    x: -100 + i*(z.w+180)/n,
+    y: 55 + (i*37)%220,
+    s: .6 + (i%5)*.14,
+    v: 4 + (i%7)*1.2
   }));
 }
-
+function makeWorldFx(){
+  const z = world();
+  const q = levels[state.level] || levels[0];
+  const eff = WORLDS[q.w].effect;
+  worldFx = [];
+  if (eff === "fireflies"){
+    for (let i=0;i<22;i++)
+      worldFx.push({ kind:"ff", x:rnd(0,z.w), y:rnd(z.groundY-240,z.groundY-20),
+                     ph:rnd(0,TAU), sp:.4+rnd(0,.6), r:rnd(1.6,3.2) });
+  } else if (eff === "dust"){
+    for (let i=0;i<35;i++)
+      worldFx.push({ kind:"dust", x:rnd(0,z.w), y:rnd(60,z.groundY-80),
+                     vx:rnd(6,22), vy:rnd(-2,4), r:rnd(1,2.4) });
+  } else if (eff === "snow"){
+    for (let i=0;i<60;i++)
+      worldFx.push({ kind:"snow", x:rnd(0,z.w), y:rnd(-50,z.groundY),
+                     vy:rnd(18,42), ph:rnd(0,TAU), r:rnd(1.2,2.8) });
+  } else if (eff === "waves"){
+    for (let i=0;i<6;i++)
+      worldFx.push({ kind:"wave", y:z.groundY+60+i*22, t:rnd(0,TAU) });
+  } else if (eff === "islands"){
+    for (let i=0;i<4;i++)
+      worldFx.push({ kind:"island", x:rnd(60,z.w-60), y:rnd(160,320),
+                     s:rnd(.7,1.4), ph:rnd(0,TAU) });
+  }
+}
 function reflow(){
   const L = layout(), z = world();
   if (cards.length){
     const n = cards.length;
-    const total = n * L.cardW + (n - 1) * L.gap;
-    const start = z.w / 2 - total / 2 + L.cardW / 2;
+    const total = n*L.cardW + (n-1)*L.gap;
+    const start = z.w/2 - total/2 + L.cardW/2;
     cards.forEach((c, i) => {
       c.w = L.cardW; c.h = L.cardH;
-      c.baseX = start + i * (L.cardW + L.gap);
-      c.baseY = L.trayY + L.cardH / 2;
+      c.baseX = start + i*(L.cardW + L.gap);
+      c.baseY = L.trayY + L.cardH/2;
       if (c.state === "idle"){ c.x = c.baseX; c.y = c.baseY; }
     });
   }
@@ -363,7 +698,7 @@ function reflow(){
     const bw = L.bridgeX2 - L.bridgeX1;
     const pw = bw / planks.length;
     planks.forEach((p, i) => {
-      p.x = L.bridgeX1 + i * pw + 2;
+      p.x = L.bridgeX1 + i*pw + 2;
       p.w = pw - 4;
       p.targetY = L.groundY;
     });
@@ -371,34 +706,49 @@ function reflow(){
   hero.x = clamp(hero.x, L.charStart, L.charEnd);
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  LEVEL INIT
+// ═══════════════════════════════════════════════════════════════════
 function initLevel(){
   const L = layout(), z = world(), q = levels[state.level];
-  const n = 3;
-  const total = n * L.cardW + (n - 1) * L.gap;
-  const start = z.w / 2 - total / 2 + L.cardW / 2;
+  const n = choices(q).length;
+  const total = n*L.cardW + (n-1)*L.gap;
+  const start = z.w/2 - total/2 + L.cardW/2;
   const ch = choices(q);
 
-  cards = ch.map((value, i) => ({
-    value,
-    baseX: start + i * (L.cardW + L.gap),
-    baseY: L.trayY + L.cardH / 2,
-    x: start + i * (L.cardW + L.gap),
-    y: L.trayY + L.cardH / 2,
-    w: L.cardW, h: L.cardH,
-    state: "idle", hidden: false,
-    scale: 1, from: null, to: null, t: 0,
-    shake: 0, seed: rnd(0, TAU)
-  }));
+  cards = ch.map((value, i) => {
+    let display, label;
+    if (q.type === "compare"){
+      const pair = value === "L" ? q.pairs[0] : q.pairs[1];
+      display = `${pair[0]} + ${pair[1]}`;
+      label = value;
+    } else {
+      display = String(value);
+      label = value;
+    }
+    return {
+      value, display, label,
+      baseX: start + i*(L.cardW + L.gap),
+      baseY: L.trayY + L.cardH/2,
+      x: start + i*(L.cardW + L.gap),
+      y: L.trayY + L.cardH/2,
+      w: L.cardW, h: L.cardH,
+      state:"idle", hidden:false,
+      scale:1, from:null, to:null, t:0,
+      shake:0, seed:rnd(0,TAU),
+      fade:1, fadeTarget:1
+    };
+  });
 
-  const nPlank = Math.min(9, 4 + Math.floor(state.level / 14));
+  const nPlank = Math.min(9, 5 + Math.floor((state.level % 20) / 4));
   const bw = L.bridgeX2 - L.bridgeX1;
   const pw = bw / nPlank;
   planks = Array.from({ length:nPlank }, (_, i) => ({
-    x: L.bridgeX1 + i * pw + 2,
+    x: L.bridgeX1 + i*pw + 2,
     w: pw - 4,
     y: L.groundY - 340,
     targetY: L.groundY,
-    vy: 0, state: "empty", delay: i * .1,
+    vy: 0, state:"empty", delay: i*.1,
     wob: 0, wobV: 0
   }));
 
@@ -406,7 +756,10 @@ function initLevel(){
   hero.state = "idle";
   hero.cheer = 0;
   state.attempts = 0;
+  state.helpShown = false;
   setHUD();
+  showStoryForLevel();
+  AudioFX.narrate(label(q).replace("?",""), save.settings.slow ? .8 : .95);
 }
 
 function resetPlanks(){
@@ -414,95 +767,157 @@ function resetPlanks(){
   planks.forEach((p, i) => {
     p.y = L.groundY - 340;
     p.vy = 0; p.state = "empty";
-    p.delay = i * .1; p.wob = 0; p.wobV = 0;
+    p.delay = i*.1; p.wob = 0; p.wobV = 0;
   });
 }
 
 function setHUD(){
   const q = levels[state.level], w = WORLDS[q.w];
-  document.getElementById("level").textContent = `W${q.w + 1} · ${state.level + 1}/100`;
+  const sessionIdx = Math.floor(state.level / 5) + 1;
+  const levelInSession = (state.level % 5) + 1;
+  document.getElementById("level").textContent =
+    `${w.icon} ${sessionIdx}.${levelInSession}`;
   document.getElementById("starsHUD").textContent = `★ ${save.stars}`;
-  document.getElementById("progressFill").style.width = `${(state.level / (levels.length - 1)) * 100}%`;
-  document.getElementById("startWorld").textContent = `${w.icon} ${w.name}`;
-  document.getElementById("savedLevel").textContent = state.level + 1;
-  document.getElementById("savedStars").textContent = save.stars;
+  document.getElementById("brandName").textContent =
+    save.name ? `Hi, ${save.name}` : "BRIDGE BUILDER MATH";
+  document.getElementById("progressFill").style.width =
+    `${(levelInSession - 1) / 4 * 100}%`;
 }
 
-function particlesAt(x, y, n = 10, kind = "gold"){
-  const colors = kind === "wood"
-    ? ["#f0c98a", "#d99a5b", "#fff2c4"]
-    : ["#ffd85f", "#fff3a8", "#ffffff"];
-  for (let i = 0; i < n; i++){
-    const a = Math.random() * TAU, sp = rnd(60, 190);
+function showStoryForLevel(){
+  const q = levels[state.level];
+  const stories = {
+    add:      ["Pip needs a bridge.", "Add the stones together."],
+    sub:      ["A stone rolled away.", "How many are left?"],
+    mul:      ["Luna sent a message.", "Multiply to lay the planks."],
+    div:      ["The path splits evenly.", "Divide to share the planks."],
+    missing:  ["One stone is hidden.", "What completes the bridge?"],
+    compare:  ["Two paths, one bridge.", "Which side is heavier?"]
+  };
+  const arr = stories[q.type] || ["Build the bridge."];
+  const text = arr[state.level % arr.length];
+  const el = document.getElementById("story");
+  el.textContent = text;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  PARTICLES
+// ═══════════════════════════════════════════════════════════════════
+function particlesAt(x, y, n=10, kind="gold"){
+  const colors = kind === "wood" ? ["#f0c98a","#d99a5b","#fff2c4"]
+                                 : ["#ffd85f","#fff3a8","#ffffff"];
+  for (let i=0;i<n;i++){
+    const a = Math.random()*TAU, sp = rnd(60,190);
     particles.push({
       x, y,
-      vx: Math.cos(a) * sp,
-      vy: Math.sin(a) * sp - rnd(30, 100),
-      g: 300, life: rnd(.55, 1), max: 1,
-      size: rnd(2, 5),
+      vx: Math.cos(a)*sp,
+      vy: Math.sin(a)*sp - rnd(30,100),
+      g: 300, life: rnd(.55,1), max:1,
+      size: rnd(2,5),
       color: colors[i % colors.length],
-      rot: rnd(0, TAU), rv: rnd(-8, 8)
+      rot: rnd(0,TAU), rv: rnd(-8,8)
     });
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  UPDATE
+// ═══════════════════════════════════════════════════════════════════
 function update(dt){
   const z = world(), L = layout();
+  const slow = save.settings.slow ? 1.35 : 1;
+  const reduced = save.settings.reduced;
 
-  clouds.forEach(c => { c.x += c.v * dt; if (c.x > z.w + 160) c.x = -160; });
+  clouds.forEach(c => { c.x += c.v*dt; if (c.x > z.w+160) c.x = -160; });
 
-  for (let i = particles.length - 1; i >= 0; i--){
+  // world FX
+  const eff = WORLDS[levels[state.level]?.w ?? 0].effect;
+  worldFx.forEach(f => {
+    if (f.kind === "ff"){
+      f.ph += dt * f.sp;
+      f.x += Math.sin(f.ph) * 8 * dt;
+      f.y += Math.cos(f.ph * .7) * 5 * dt;
+    } else if (f.kind === "dust"){
+      f.x += f.vx * dt * .3;
+      f.y += f.vy * dt;
+      if (f.x > z.w+20){ f.x = -20; f.y = rnd(60, z.groundY-80); }
+    } else if (f.kind === "snow"){
+      f.y += f.vy * dt;
+      f.x += Math.sin(f.ph += dt*1.2) * 10 * dt;
+      if (f.y > z.groundY+20){ f.y = -20; f.x = rnd(0,z.w); }
+    } else if (f.kind === "wave"){
+      f.t += dt * 1.4;
+    } else if (f.kind === "island"){
+      f.ph += dt * .35;
+    }
+  });
+
+  // particles
+  for (let i = particles.length-1; i >= 0; i--){
     const p = particles[i];
-    p.vy += p.g * dt;
-    p.x += p.vx * dt; p.y += p.vy * dt;
-    p.rot += p.rv * dt;
+    p.vy += p.g*dt;
+    p.x += p.vx*dt; p.y += p.vy*dt;
+    p.rot += p.rv*dt;
     p.life -= dt;
-    if (p.life <= 0) particles.splice(i, 1);
+    if (p.life <= 0) particles.splice(i,1);
   }
 
+  // hero
   hero.blinkT -= dt;
-  if (hero.blinkT <= 0){ hero.blinkT = rnd(2, 4.5); hero.blink = 0; }
-  hero.blink = clamp(hero.blink + dt * 10, 0, 1);
+  if (hero.blinkT <= 0){ hero.blinkT = rnd(2,4.5); hero.blink = 0; }
+  hero.blink = clamp(hero.blink + dt*10, 0, 1);
   hero.phase += dt * (hero.state === "walk" ? 9 : 1.2);
+  hero.personalityTimer += dt;
 
+  // friend reacts
+  friend.bounce = Math.sin(performance.now()/620) * 2;
+  friend.wave = (friend.wave + dt * 1.4) % TAU;
+
+  // cards
   cards.forEach(c => {
+    c.fade = lerp(c.fade, c.fadeTarget, 1 - Math.pow(.001, dt));
     if (c.state === "return"){
-      c.t = clamp(c.t + dt * 3.5, 0, 1);
+      c.t = clamp(c.t + dt*3.5, 0, 1);
       const t = ease(c.t);
       c.x = lerp(c.from.x, c.baseX, t);
       c.y = lerp(c.from.y, c.baseY, t);
       if (c.t >= 1) c.state = "idle";
     }
     if (c.state === "fly"){
-      c.t = clamp(c.t + dt * 2.5, 0, 1);
+      c.t = clamp(c.t + dt*2.5, 0, 1);
       const t = smooth(c.t);
       c.x = lerp(c.from.x, c.to.x, t);
-      c.y = lerp(c.from.y, c.to.y, t) - Math.sin(t * Math.PI) * 28;
+      c.y = lerp(c.from.y, c.to.y, t) - Math.sin(t*Math.PI)*28;
       c.scale = lerp(1.12, .3, t);
       if (c.t >= 1) c.hidden = true;
     }
     if (c.shake > 0) c.shake -= dt;
   });
 
+  // planks
   planks.forEach(p => {
     if (p.state === "falling"){
       if (p.delay > 0){ p.delay -= dt; return; }
-      p.vy += 2400 * dt;
-      p.y += p.vy * dt;
+      p.vy += 2400*dt;
+      p.y += p.vy*dt;
       if (p.y >= p.targetY){
         p.y = p.targetY;
         p.vy = 0;
         p.state = "seated";
         p.wobV = -9;
         AudioFX.snap();
-        particlesAt(p.x + p.w / 2, p.y, 7, "wood");
+        particlesAt(p.x + p.w/2, p.y, 7, "wood");
       }
     } else if (p.state === "seated"){
-      p.wobV += (-p.wob * 90 - p.wobV * 7) * dt;
+      p.wobV += (-p.wob*90 - p.wobV*7) * dt;
       p.wob += p.wobV * dt;
     }
   });
 
+  // phases
   if (state.phase === "BUILDING"){
     state.buildTimer += dt;
     if (planks.every(p => p.state === "seated") && state.buildTimer > .35){
@@ -515,15 +930,24 @@ function update(dt){
 
   if (state.phase === "CROSSING"){
     state.walkTimer += dt;
-    const dur = state.reduced ? 1.5 : (portrait ? 2.4 : 2.8);
-    const p = clamp(state.walkTimer / dur, 0, 1);
-    hero.x = lerp(L.charStart, L.charEnd, smooth(p));
-    if (Math.floor(state.walkTimer * 3) !== Math.floor((state.walkTimer - dt) * 3))
-      AudioFX.step();
+    // §9 "the crossing matters": slower, weightier
+    const baseDur = reduced ? 2.0 : (portrait ? 3.4 : 3.8);
+    const dur = baseDur * slow;
+    const p = clamp(state.walkTimer/dur, 0, 1);
+    // pause before first step (breath)
+    const walkP = p < .12 ? 0 : smooth((p - .12) / .88);
+    hero.x = lerp(L.charStart, L.charEnd, walkP);
+    if (p > .2 && p < .85){
+      if (Math.floor(state.walkTimer*2.4) !== Math.floor((state.walkTimer - dt)*2.4))
+        AudioFX.step();
+    }
     if (p >= 1){
       hero.state = "cheer";
       hero.cheer = 0;
-      particlesAt(hero.x, L.groundY - 55, 24);
+      state.consecutiveCorrect++;
+      // personality: extra bounce if on a streak
+      const burst = state.consecutiveCorrect >= 3 ? 36 : 24;
+      particlesAt(hero.x, L.groundY - 55, burst);
       state.phase = "CHEERING";
       state.transitionToken++;
       const token = state.transitionToken;
@@ -531,31 +955,44 @@ function update(dt){
       if (save.best[state.level] < earned){
         save.stars += earned - save.best[state.level];
         save.best[state.level] = earned;
+        state.sessionStarsEarned += earned - save.best[state.level];
         persist();
         AudioFX.star();
       }
+      save.bridges = Math.max(save.bridges, state.level + 1);
+      persist();
       setHUD();
-      setTimeout(() => { if (token === state.transitionToken) next(); },
-        state.reduced ? 500 : 1100);
+      // friend waves
+      friend.wave = 0;
+      AudioFX.wave();
+      setTimeout(() => { if (token === state.transitionToken) afterLevel(); },
+        save.settings.reduced ? 500 : 1500);
     }
   }
 
   if (state.phase === "CHEERING") hero.cheer += dt;
 }
 
-// ─── DRAW ───
+// ═══════════════════════════════════════════════════════════════════
+//  DRAW
+// ═══════════════════════════════════════════════════════════════════
 function draw(){
-  const q = levels[state.level], theme = WORLDS[q.w];
+  const q = levels[state.level] || levels[0];
+  const theme = WORLDS[q.w];
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.fillStyle = theme.sky[0];
   ctx.fillRect(0, 0, W, H);
   drawSky(theme);
+  drawWorldFx();
   drawMountains(theme);
   drawClouds();
   drawGround(theme);
+  drawVillage();
   drawBridge();
-  if (state.phase !== "START") drawHero();
+  if (state.phase !== "ONBOARD" && state.phase !== "HOME") drawHero();
+  drawFriend();
   drawEquation();
+  drawHelp();
   drawCards();
   drawParticles();
 }
@@ -568,7 +1005,6 @@ function drawSky(theme){
   g.addColorStop(1, theme.sky[2]);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
-
   const sx = portrait ? z.w - 70 : z.w - 185;
   const sy = portrait ? 110 : 135;
   const sg = ctx.createRadialGradient(X(sx), Y(sy), R(15), X(sx), Y(sy), R(240));
@@ -576,7 +1012,6 @@ function drawSky(theme){
   sg.addColorStop(1, "rgba(255,224,130,0)");
   ctx.fillStyle = sg;
   ctx.fillRect(0, 0, W, H);
-
   ctx.fillStyle = theme.w === 2 ? "#f4f0d8" : "#fff4c8";
   ctx.beginPath();
   ctx.arc(X(sx), Y(sy), R(46), 0, TAU);
@@ -587,7 +1022,7 @@ function drawClouds(){
   clouds.forEach(c => {
     ctx.save();
     ctx.translate(X(c.x), Y(c.y));
-    ctx.scale(c.s * S, c.s * S);
+    ctx.scale(c.s*S, c.s*S);
     ctx.globalAlpha = .86;
     ctx.fillStyle = "#fff";
     [[0,0,27],[23,-8,31],[51,0,25],[28,12,23]].forEach(a => {
@@ -597,19 +1032,64 @@ function drawClouds(){
   });
 }
 
+function drawWorldFx(){
+  const z = world();
+  worldFx.forEach(f => {
+    if (f.kind === "ff"){
+      const alpha = .5 + Math.sin(f.ph*2)*.4;
+      ctx.fillStyle = `rgba(255,240,140,${alpha})`;
+      ctx.beginPath();
+      ctx.arc(X(f.x), Y(f.y), R(f.r), 0, TAU);
+      ctx.fill();
+    } else if (f.kind === "dust"){
+      ctx.fillStyle = "rgba(255,230,180,.4)";
+      ctx.beginPath();
+      ctx.arc(X(f.x), Y(f.y), R(f.r), 0, TAU);
+      ctx.fill();
+    } else if (f.kind === "snow"){
+      ctx.fillStyle = "rgba(255,255,255,.85)";
+      ctx.beginPath();
+      ctx.arc(X(f.x), Y(f.y), R(f.r), 0, TAU);
+      ctx.fill();
+    } else if (f.kind === "wave"){
+      const alpha = .18 + Math.sin(f.t)*.1;
+      ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+      ctx.lineWidth = R(1.6);
+      ctx.beginPath();
+      const y = Y(f.y);
+      const startX = X(z.w * .35);
+      const endX = X(z.w * .65);
+      ctx.moveTo(startX, y);
+      ctx.bezierCurveTo(startX + (endX-startX)*.3, y - R(6),
+                        startX + (endX-startX)*.7, y + R(6), endX, y);
+      ctx.stroke();
+    } else if (f.kind === "island"){
+      const bob = Math.sin(f.ph)*4;
+      ctx.fillStyle = "rgba(140,130,200,.55)";
+      ctx.beginPath();
+      ctx.ellipse(X(f.x), Y(f.y + bob), R(50*f.s), R(12*f.s), 0, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = "rgba(160,150,220,.7)";
+      ctx.beginPath();
+      ctx.arc(X(f.x), Y(f.y + bob - 4*f.s), R(6*f.s), 0, TAU);
+      ctx.fill();
+    }
+  });
+}
+
 function drawMountains(theme){
   const L = layout(), z = world(), base = L.groundY;
   const cols = theme.w === 2
     ? ["#536995","#42577f","#506d68","#385d52"]
     : ["#a2c8d8","#7cb0a0","#6fbf82","#4d9c5e"];
-  const peaks = portrait ? [430, 500, 545, 580] : [320, 405, 455, 490];
+  const peaks = portrait ? [430,500,545,580] : [320,405,455,490];
   peaks.forEach((peak, ri) => {
     ctx.fillStyle = cols[ri];
     ctx.beginPath();
     ctx.moveTo(X(0), Y(base));
     ctx.lineTo(X(0), Y(peak));
-    for (let x = 0; x <= z.w; x += 80){
-      const h = Math.sin(x * (.007 + ri * .003) + ri) * 30 + Math.sin(x * .023 + ri) * 14;
+    for (let x=0;x<=z.w;x+=80){
+      const h = Math.sin(x*(.007 + ri*.003) + ri)*30 + Math.sin(x*.023 + ri)*14;
       ctx.lineTo(X(x), Y(peak + 30 - h));
     }
     ctx.lineTo(X(z.w), Y(base));
@@ -620,25 +1100,241 @@ function drawMountains(theme){
 
 function drawGround(theme){
   const L = layout(), z = world();
-  const g = ctx.createLinearGradient(0, Y(L.groundY - 5), 0, Y(L.groundY + 30));
+  const g = ctx.createLinearGradient(0, Y(L.groundY-5), 0, Y(L.groundY+30));
   g.addColorStop(0, theme.ground[0]);
   g.addColorStop(1, theme.ground[1]);
   ctx.fillStyle = g;
   ctx.fillRect(0, Y(L.groundY), W, Y(z.h) - Y(L.groundY));
 
-  const gap = L.ravineX2 - L.ravineX1;
-  ctx.fillStyle = "#1b2c3d";
-  ctx.fillRect(X(L.ravineX1), Y(L.groundY), R(gap), R(z.h - L.groundY));
+  const rx1 = L.ravineX1, rx2 = L.ravineX2;
+  const gap = rx2 - rx1;
+  const top = L.groundY, bot = z.h;
 
-  const wg = ctx.createLinearGradient(0, Y(L.groundY + 190), 0, Y(z.h));
-  wg.addColorStop(0, "#3c8db5");
-  wg.addColorStop(1, "#153f62");
+  const rg = ctx.createLinearGradient(0, Y(top), 0, Y(bot));
+  rg.addColorStop(0, "#1a2b3d");
+  rg.addColorStop(.35, "#101d2a");
+  rg.addColorStop(.75, "#08111c");
+  rg.addColorStop(1, "#040810");
+  ctx.fillStyle = rg;
+  ctx.fillRect(X(rx1), Y(top), R(gap), R(bot - top));
+
+  const strataH = 11;
+  const nStrata = Math.floor((bot - top - 30) / strataH);
+  for (let i=0;i<nStrata;i++){
+    const yy = top + 6 + i*strataH;
+    const w = 12 + ((i*7)%14);
+    const darkness = .35 + (i/nStrata)*.35;
+    ctx.fillStyle = `rgba(28,20,14,${darkness})`;
+    ctx.fillRect(X(rx1), Y(yy), R(w), R(strataH-1));
+    ctx.fillStyle = `rgba(120,90,60,${.10 + (i/nStrata)*.06})`;
+    ctx.fillRect(X(rx1), Y(yy), R(w), R(1));
+  }
+  for (let i=0;i<nStrata;i++){
+    const yy = top + 6 + i*strataH;
+    const w = 14 + ((i*5)%12);
+    const darkness = .35 + (i/nStrata)*.35;
+    ctx.fillStyle = `rgba(28,20,14,${darkness})`;
+    ctx.fillRect(X(rx2-w), Y(yy), R(w), R(strataH-1));
+    ctx.fillStyle = `rgba(120,90,60,${.10 + (i/nStrata)*.06})`;
+    ctx.fillRect(X(rx2-w), Y(yy), R(w), R(1));
+  }
+
+  const haze = ctx.createLinearGradient(0, Y(top), 0, Y(top+60));
+  haze.addColorStop(0, "rgba(140,180,210,.14)");
+  haze.addColorStop(1, "rgba(140,180,210,0)");
+  ctx.fillStyle = haze;
+  ctx.fillRect(X(rx1+6), Y(top), R(gap-12), R(60));
+
+  const waterH = 55;
+  const waterTop = bot - waterH;
+  const wg = ctx.createLinearGradient(0, Y(waterTop), 0, Y(bot));
+  wg.addColorStop(0, "rgba(58,140,180,0)");
+  wg.addColorStop(.4, "rgba(58,140,180,.45)");
+  wg.addColorStop(1, "rgba(15,60,100,.95)");
   ctx.fillStyle = wg;
-  ctx.fillRect(X(L.ravineX1), Y(L.groundY + 190), R(gap), R(z.h - L.groundY - 190));
+  ctx.fillRect(X(rx1+2), Y(waterTop), R(gap-4), R(waterH));
+  ctx.fillStyle = "rgba(170,220,250,.35)";
+  ctx.fillRect(X(rx1+8), Y(waterTop+2), R(gap*.35), R(1.6));
+  ctx.fillStyle = "rgba(170,220,250,.22)";
+  ctx.fillRect(X(rx1+gap*.55), Y(waterTop+8), R(gap*.30), R(1.4));
+}
+
+// ─── VILLAGE (grows with bridges crossed) ───
+function drawVillage(){
+  const L = layout();
+  const count = save.bridges;
+  if (count <= 0) return;
+
+  // village sits on the far bank (right side of ravine)
+  const vx = L.ravineX2 + 30;
+  const baseY = L.groundY;
+
+  // Buildings every 5 bridges, decorations each bridge
+  const buildings = Math.floor(count / 5);
+  const decos = count;
+
+  // individual decoration types
+  for (let i = 0; i < Math.min(decos, 30); i++){
+    const offset = (i * 37) % 140;
+    const x = vx + offset;
+    const seed = i * 7;
+    const kind = i % 3;
+    ctx.save();
+    if (kind === 0){ // small tree
+      ctx.fillStyle = "#5a3d22";
+      ctx.fillRect(X(x), Y(baseY - 12), R(3), R(12));
+      ctx.fillStyle = "#4b9c5f";
+      ctx.beginPath();
+      ctx.arc(X(x+1.5), Y(baseY - 16), R(7), 0, TAU);
+      ctx.fill();
+    } else if (kind === 1){ // rock
+      ctx.fillStyle = "#8d8577";
+      ctx.beginPath();
+      ctx.ellipse(X(x), Y(baseY - 3), R(5), R(3.5), 0, 0, TAU);
+      ctx.fill();
+    } else { // flower
+      ctx.fillStyle = "#e18a8a";
+      ctx.beginPath();
+      ctx.arc(X(x), Y(baseY - 5), R(2.2), 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = "#ffd85f";
+      ctx.beginPath();
+      ctx.arc(X(x), Y(baseY - 5), R(1), 0, TAU);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // buildings every 5 bridges
+  for (let i = 0; i < Math.min(buildings, 8); i++){
+    const offset = (i * 62) % 180;
+    const x = vx + offset;
+    const w = 22 + (i % 3) * 6;
+    const h = 20 + (i % 2) * 10;
+    // body
+    ctx.fillStyle = "#c99a62";
+    ctx.fillRect(X(x), Y(baseY - h), R(w), R(h));
+    // roof
+    ctx.fillStyle = i % 2 ? "#b85f5f" : "#7b6fc4";
+    ctx.beginPath();
+    ctx.moveTo(X(x - 3), Y(baseY - h));
+    ctx.lineTo(X(x + w/2), Y(baseY - h - 12));
+    ctx.lineTo(X(x + w + 3), Y(baseY - h));
+    ctx.closePath();
+    ctx.fill();
+    // window
+    ctx.fillStyle = "#ffe6a2";
+    ctx.fillRect(X(x + w/2 - 3), Y(baseY - h + 6), R(6), R(6));
+  }
+}
+
+function drawFriend(){
+  const L = layout();
+  const x = L.friendX;
+  const y = L.groundY;
+
+  ctx.save();
+  ctx.translate(X(x), Y(y));
+  ctx.scale(S*1.1, S*1.1);
+  ctx.translate(0, friend.bounce);
+
+  // shadow
+  ctx.save();
+  ctx.scale(1,.3);
+  ctx.fillStyle = "rgba(0,0,0,.25)";
+  ctx.beginPath();
+  ctx.ellipse(0, 6, 26, 10, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+
+  // body (dress, blue)
+  ctx.fillStyle = "#7fa9e0";
+  ctx.beginPath();
+  ctx.moveTo(-14, 0);
+  ctx.quadraticCurveTo(-16, -28, -10, -42);
+  ctx.lineTo(10, -42);
+  ctx.quadraticCurveTo(16, -28, 14, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // arms (one waving)
+  ctx.strokeStyle = "#e8b07a"; ctx.lineWidth = 8; ctx.lineCap = "round";
+  // left arm down
+  ctx.beginPath();
+  ctx.moveTo(-12, -38);
+  ctx.lineTo(-18, -20);
+  ctx.stroke();
+  // right arm waving
+  const waveOffset = Math.sin(friend.wave) * 8;
+  ctx.beginPath();
+  ctx.moveTo(12, -38);
+  ctx.lineTo(24 + waveOffset, -52);
+  ctx.stroke();
+  // hand
+  ctx.fillStyle = "#fbd2a5";
+  ctx.beginPath();
+  ctx.arc(24 + waveOffset, -52, 5, 0, TAU);
+  ctx.fill();
+
+  // head
+  const hy = -58;
+  ctx.beginPath();
+  ctx.arc(0, hy, 20, 0, TAU);
+  ctx.fillStyle = "#fbd2a5";
+  ctx.fill();
+  // hair (long, dark)
+  ctx.fillStyle = "#3a2519";
+  ctx.beginPath();
+  ctx.arc(0, hy - 3, 21, Math.PI, TAU);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-21, hy - 3);
+  ctx.quadraticCurveTo(-23, hy + 18, -18, hy + 22);
+  ctx.lineTo(-12, hy + 18);
+  ctx.quadraticCurveTo(-16, hy + 6, -18, hy - 6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(21, hy - 3);
+  ctx.quadraticCurveTo(23, hy + 18, 18, hy + 22);
+  ctx.lineTo(12, hy + 18);
+  ctx.quadraticCurveTo(16, hy + 6, 18, hy - 6);
+  ctx.closePath();
+  ctx.fill();
+  // face
+  ctx.fillStyle = "#2a1c10";
+  ctx.beginPath(); ctx.arc(-7, hy + 2, 2.4, 0, TAU); ctx.arc(7, hy + 2, 2.4, 0, TAU); ctx.fill();
+  ctx.fillStyle = "rgba(255,140,140,.5)";
+  ctx.beginPath();
+  ctx.ellipse(-11, hy + 8, 3.4, 2, 0, 0, TAU);
+  ctx.ellipse(11, hy + 8, 3.4, 2, 0, 0, TAU);
+  ctx.fill();
+  // smile
+  ctx.strokeStyle = "#8a4a3a"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(0, hy + 8, 5, .15*Math.PI, .85*Math.PI);
+  ctx.stroke();
+
+  ctx.restore();
 }
 
 function drawBridge(){
   const L = layout();
+  const anySeated = planks.some(p => p.state === "seated");
+  if (anySeated){
+    ctx.fillStyle = "#4a2c16";
+    ctx.fillRect(X(L.bridgeX1+2), Y(L.groundY + L.deck - 2), R(10), R(28));
+    ctx.fillRect(X(L.bridgeX2-12), Y(L.groundY + L.deck - 2), R(10), R(28));
+    ctx.fillStyle = "#2a1c10";
+    ctx.beginPath();
+    ctx.arc(X(L.bridgeX1+7), Y(L.groundY + L.deck + 8), R(1.5), 0, TAU);
+    ctx.arc(X(L.bridgeX2-7), Y(L.groundY + L.deck + 8), R(1.5), 0, TAU);
+    ctx.fill();
+  }
+  // user's chosen color
+  const base = save.color || "#d99a5b";
+  const light = lighten(base, .18);
+  const dark = darken(base, .25);
   planks.forEach(p => {
     if (p.state === "empty"){
       ctx.save();
@@ -650,46 +1346,74 @@ function drawBridge(){
       return;
     }
     ctx.save();
-    ctx.translate(0, Y(p.wob * .4) - Y(0));
-    ctx.fillStyle = "rgba(0,0,0,.25)";
-    ctx.fillRect(X(p.x), Y(p.y + 4), R(p.w), R(L.deck));
+    ctx.translate(0, Y(p.wob*.4) - Y(0));
+    ctx.fillStyle = "rgba(0,0,0,.32)";
+    ctx.fillRect(X(p.x), Y(p.y+4), R(p.w), R(L.deck));
     const g = ctx.createLinearGradient(0, Y(p.y), 0, Y(p.y + L.deck));
-    g.addColorStop(0, "#efbd82");
-    g.addColorStop(.55, "#d99a5b");
-    g.addColorStop(1, "#9f6632");
+    g.addColorStop(0, light);
+    g.addColorStop(.55, base);
+    g.addColorStop(1, dark);
     ctx.fillStyle = g;
     ctx.fillRect(X(p.x), Y(p.y), R(p.w), R(L.deck));
-    ctx.strokeStyle = "#5e3414";
+    ctx.strokeStyle = "#2a1c10";
     ctx.lineWidth = R(1.5);
-    ctx.strokeRect(X(p.x) + R(1), Y(p.y) + R(1), R(p.w - 2), R(L.deck - 2));
+    ctx.strokeRect(X(p.x)+R(1), Y(p.y)+R(1), R(p.w-2), R(L.deck-2));
+    ctx.strokeStyle = "rgba(90,45,15,.3)";
+    ctx.lineWidth = R(1);
+    for (let k=0;k<2;k++){
+      const yy = p.y + 10 + k*9;
+      ctx.beginPath();
+      ctx.moveTo(X(p.x+4), Y(yy));
+      ctx.bezierCurveTo(X(p.x + p.w*.3), Y(yy+1), X(p.x + p.w*.7), Y(yy-1), X(p.x+p.w-4), Y(yy));
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(255,255,255,.28)";
+    ctx.fillRect(X(p.x+3), Y(p.y+2), R(p.w-6), R(1.6));
     ctx.restore();
   });
+}
+function lighten(hex, amt){
+  const c = hexToRgb(hex);
+  return `rgb(${Math.min(255,c.r+255*amt)},${Math.min(255,c.g+255*amt)},${Math.min(255,c.b+255*amt)})`;
+}
+function darken(hex, amt){
+  const c = hexToRgb(hex);
+  return `rgb(${Math.max(0,c.r-255*amt)},${Math.max(0,c.g-255*amt)},${Math.max(0,c.b-255*amt)})`;
+}
+function hexToRgb(hex){
+  const h = hex.replace("#","");
+  return {
+    r: parseInt(h.substr(0,2),16),
+    g: parseInt(h.substr(2,2),16),
+    b: parseInt(h.substr(4,2),16)
+  };
 }
 
 function drawHero(){
   const L = layout();
-  const bob = Math.sin(performance.now() / 520) * 1.5 +
-    (hero.state === "walk" ? Math.abs(Math.sin(hero.phase)) * 3 : 0);
+  const bob = Math.sin(performance.now()/520)*1.5 +
+    (hero.state === "walk" ? Math.abs(Math.sin(hero.phase))*3 : 0);
   const walk = hero.state === "walk" ? 1 : 0;
   const ph = hero.phase;
 
   ctx.save();
   ctx.translate(X(hero.x), Y(L.groundY));
-  ctx.scale(S, S);
-
+  ctx.scale(S*1.18, S*1.18);
   ctx.save();
-  ctx.scale(1, .3);
-  ctx.fillStyle = "rgba(0,0,0,.25)";
+  ctx.scale(1,.3);
+  ctx.fillStyle = "rgba(0,0,0,.28)";
+  ctx.filter = "blur(2px)";
   ctx.beginPath();
-  ctx.ellipse(0, 5, 30, 12, 0, 0, TAU);
+  ctx.ellipse(0, 6, 30, 12, 0, 0, TAU);
   ctx.fill();
+  ctx.filter = "none";
   ctx.restore();
 
   ctx.translate(0, -bob);
   const hip = -46, should = -88, head = -118;
 
-  drawLimb(-10, hip, Math.sin(ph + Math.PI) * .5 * walk, "#2f4a75", "#1e3355");
-  drawArm(-16, should, Math.sin(ph + Math.PI) * .55 * walk + .18);
+  drawLimb(-10, hip, Math.sin(ph + Math.PI)*.5*walk, "#2f4a75", "#1e3355");
+  drawArm(-18, should, -0.35 + Math.sin(ph + Math.PI)*.25*walk, "#d69a6a", "#e8b07a");
 
   ctx.beginPath();
   ctx.moveTo(-16, 0);
@@ -702,22 +1426,26 @@ function drawHero(){
   tg.addColorStop(1, "#dc5959");
   ctx.fillStyle = tg;
   ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -40, 14, 4, 0, 0, TAU);
+  ctx.fillStyle = "rgba(0,0,0,.10)";
+  ctx.fill();
+  ctx.fillStyle = "#b83b3b";
+  ctx.beginPath(); ctx.arc(0, -22, 1.7, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -13, 1.7, 0, TAU); ctx.fill();
 
-  drawLimb(10, hip, Math.sin(ph) * .5 * walk, "#4a6fa8", "#2d4a78");
-  drawArm(16, should, Math.sin(ph) * .55 * walk + .18);
+  drawLimb(10, hip, Math.sin(ph)*.5*walk, "#4a6fa8", "#2d4a78");
+  drawArm(18, should, 0.35 + Math.sin(ph)*.25*walk, "#f5c193", "#fbd2a5");
 
   ctx.save();
   ctx.translate(0, head);
-
   ctx.fillStyle = "#e8b07a";
   ctx.fillRect(-5, 18, 10, 12);
-
   const hg = ctx.createRadialGradient(-6, -6, 4, 0, 0, 26);
   hg.addColorStop(0, "#fbd2a5");
   hg.addColorStop(1, "#e0a273");
   ctx.fillStyle = hg;
   ctx.beginPath(); ctx.arc(0, 0, 26, 0, TAU); ctx.fill();
-
   ctx.fillStyle = "#4a2f22";
   ctx.beginPath();
   ctx.moveTo(-27, -4);
@@ -727,6 +1455,10 @@ function drawHero(){
   ctx.quadraticCurveTo(12, -16, -2, -16);
   ctx.quadraticCurveTo(-14, -17, -22, -9);
   ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(-8, -18, 9, 3, -.3, 0, TAU);
+  ctx.fillStyle = "rgba(255,255,255,.2)";
   ctx.fill();
 
   const blink = hero.blink > .08;
@@ -738,36 +1470,36 @@ function drawHero(){
     ctx.fill();
     ctx.fillStyle = "#2a1c10";
     ctx.beginPath(); ctx.arc(-8, 3, 3, 0, TAU); ctx.arc(8, 3, 3, 0, TAU); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.9)";
+    ctx.beginPath(); ctx.arc(-7, 1.6, 1, 0, TAU); ctx.arc(9, 1.6, 1, 0, TAU); ctx.fill();
   } else {
-    ctx.strokeStyle = "#2a1c10";
-    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = "#2a1c10"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(-11, 3); ctx.lineTo(-5, 3);
     ctx.moveTo(5, 3); ctx.lineTo(11, 3);
     ctx.stroke();
   }
-
   ctx.fillStyle = "rgba(255,140,140,.5)";
   ctx.beginPath();
   ctx.ellipse(-14, 9, 4, 2.5, 0, 0, TAU);
   ctx.ellipse(14, 9, 4, 2.5, 0, 0, TAU);
   ctx.fill();
-
-  ctx.strokeStyle = "#8a4a3a";
-  ctx.lineWidth = 1.7;
+  ctx.strokeStyle = "#8a4a3a"; ctx.lineWidth = 1.7; ctx.lineCap = "round";
   ctx.beginPath();
-  if (hero.state === "cheer") ctx.arc(0, 8, 6, .12 * Math.PI, .88 * Math.PI);
-  else ctx.arc(0, 10, 4, .18 * Math.PI, .82 * Math.PI);
+  if (hero.state === "cheer") ctx.arc(0, 8, 6, .12*Math.PI, .88*Math.PI);
+  else ctx.arc(0, 10, 4, .18*Math.PI, .82*Math.PI);
   ctx.stroke();
   ctx.restore();
 
+  // Cheer sparkles (more on streak)
   if (hero.state === "cheer"){
-    for (let i = 0; i < 8; i++){
-      const a = i / 8 * TAU + hero.cheer * 2;
-      const r = 43 + Math.sin(hero.cheer * 4 + i) * 8;
-      ctx.fillStyle = "rgba(255,220,120,.9)";
+    const count = state.consecutiveCorrect >= 3 ? 12 : 8;
+    for (let i=0;i<count;i++){
+      const a = i/count*TAU + hero.cheer*2;
+      const r = 43 + Math.sin(hero.cheer*4 + i)*8;
+      ctx.fillStyle = `rgba(255,220,120,${Math.max(0, 1 - hero.cheer*.55)})`;
       ctx.beginPath();
-      ctx.arc(Math.cos(a) * r, -70 + Math.sin(a) * r * .7, 2.7, 0, TAU);
+      ctx.arc(Math.cos(a)*r, -70 + Math.sin(a)*r*.7, 2.7, 0, TAU);
       ctx.fill();
     }
   }
@@ -776,33 +1508,32 @@ function drawHero(){
 
 function drawLimb(lx, ly, a, c1, c2){
   const tl = 24, sl = 22;
-  const kx = lx + Math.sin(a) * tl;
-  const ky = ly + Math.cos(a) * tl;
-  const fx = kx + Math.sin(a) * sl;
-  const fy = ky + Math.cos(a) * sl;
+  const kx = lx + Math.sin(a)*tl;
+  const ky = ly + Math.cos(a)*tl;
+  const fx = kx + Math.sin(a)*sl;
+  const fy = ky + Math.cos(a)*sl;
   ctx.strokeStyle = c1; ctx.lineWidth = 11; ctx.lineCap = "round";
   ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(kx, ky); ctx.stroke();
   ctx.strokeStyle = c2; ctx.lineWidth = 10;
   ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
   ctx.fillStyle = "#2a1c10";
-  ctx.beginPath(); ctx.ellipse(fx + 3, fy + 3, 9, 4.5, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(fx+3, fy+3, 9, 4.5, 0, 0, TAU); ctx.fill();
 }
-
-function drawArm(sx, sy, a){
-  const ex = sx + Math.sin(a) * 20;
-  const ey = sy + Math.cos(a) * 11 + 7;
-  const fx = ex + Math.sin(a * .5 + .35) * 16;
-  const fy = ey + Math.cos(a * .5 + .35) * 10 + 6;
-  ctx.strokeStyle = "#f0bd8e"; ctx.lineWidth = 10; ctx.lineCap = "round";
+function drawArm(sx, sy, a, upperCol, handCol){
+  const ex = sx + Math.sin(a)*20;
+  const ey = sy + Math.cos(a)*11 + 7;
+  const fx = ex + Math.sin(a*.5 + .35)*16;
+  const fy = ey + Math.cos(a*.5 + .35)*10 + 6;
+  ctx.strokeStyle = upperCol; ctx.lineWidth = 10; ctx.lineCap = "round";
   ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.lineTo(fx, fy); ctx.stroke();
-  ctx.fillStyle = "#fbd2a5";
+  ctx.fillStyle = handCol;
   ctx.beginPath(); ctx.arc(fx, fy, 5, 0, TAU); ctx.fill();
 }
 
 function drawEquation(){
   const L = layout(), z = world(), q = levels[state.level];
+  if (!q) return;
   const txt = label(q);
-  // Fit font to width
   const maxW = z.w - 40;
   let fontPx = portrait ? 44 : 58;
   ctx.save();
@@ -821,61 +1552,150 @@ function drawEquation(){
   ctx.shadowOffsetY = R(8);
   ctx.fillStyle = "#fffaf0";
   ctx.beginPath();
-  ctx.roundRect(X(z.w / 2 - boxW / 2), Y(L.eqY), R(boxW), R(L.eqH), R(26));
+  ctx.roundRect(X(z.w/2 - boxW/2), Y(L.eqY), R(boxW), R(L.eqH), R(26));
   ctx.fill();
   ctx.shadowColor = "transparent";
   ctx.fillStyle = "#17314b";
-  ctx.fillText(txt, X(z.w / 2), Y(L.eqY + L.eqH / 2 + 2));
+  ctx.fillText(txt, X(z.w/2), Y(L.eqY + L.eqH/2 + 2));
+  ctx.restore();
+}
+
+// ─── HELP visualization (2nd wrong answer) ───
+function drawHelp(){
+  if (!state.helpShown) return;
+  const L = layout(), z = world(), q = levels[state.level];
+  if (!q) return;
+  if (q.type !== "add" && q.type !== "sub" && q.type !== "missing") return;
+
+  const cx = z.w / 2;
+  const y = L.eqY + L.eqH + 26;
+
+  ctx.save();
+  // panel background
+  const w = 240, h = 52;
+  ctx.fillStyle = "rgba(255,255,255,.9)";
+  ctx.beginPath();
+  ctx.roundRect(X(cx - w/2), Y(y), R(w), R(h), R(16));
+  ctx.fill();
+  ctx.strokeStyle = "rgba(23,49,75,.2)";
+  ctx.lineWidth = R(1.5);
+  ctx.stroke();
+
+  // dots
+  const dotR = 4;
+  const gap = 10;
+  let left = 0, right = 0;
+  if (q.type === "add"){
+    left = q.a; right = q.b;
+  } else if (q.type === "sub"){
+    left = q.a; right = -q.b;  // neg shown as hollow
+  } else if (q.type === "missing"){
+    left = q.a; right = q.b;   // b is answer, we hide it
+  }
+
+  // draw left dots
+  const startX = cx - w/2 + 16;
+  let dx = startX;
+  for (let i = 0; i < left; i++){
+    ctx.beginPath();
+    ctx.arc(X(dx), Y(y + h/2), R(dotR), 0, TAU);
+    ctx.fillStyle = "#17314b";
+    ctx.fill();
+    dx += gap;
+  }
+  // plus or minus
+  ctx.fillStyle = "#17314b";
+  ctx.font = `900 ${R(16)}px ui-rounded,sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(q.type === "sub" ? "−" : "+", X(dx + 4), Y(y + h/2));
+  dx += 14;
+  // right dots — hollow if these are the "taken away" for sub; visible for add
+  const hideRight = q.type === "missing" && !state.helpShown;
+  for (let i = 0; i < Math.abs(right); i++){
+    ctx.beginPath();
+    ctx.arc(X(dx), Y(y + h/2), R(dotR), 0, TAU);
+    if (q.type === "sub"){
+      ctx.strokeStyle = "#17314b";
+      ctx.lineWidth = R(1.5);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = "#17314b";
+      ctx.fill();
+    }
+    dx += gap;
+  }
+
+  ctx.restore();
+}
+
+function drawCard(c){
+  const L = layout(), t = performance.now()/1000;
+  const bob = c.state === "idle" ? Math.sin(t*1.8 + c.seed)*2 : 0;
+  const shake = c.shake > 0 ? Math.sin(c.shake*60)*6 : 0;
+
+  ctx.save();
+  ctx.globalAlpha = c.fade;
+  ctx.translate(X(c.x + shake), Y(c.y + bob));
+  ctx.scale(c.scale, c.scale);
+
+  ctx.fillStyle = "rgba(20,10,0,.22)";
+  ctx.beginPath();
+  ctx.ellipse(0, L.cardH/2 + 8, L.cardW*.42, 9, 0, 0, TAU);
+  ctx.filter = "blur(2px)";
+  ctx.fill();
+  ctx.filter = "none";
+
+  ctx.beginPath();
+  ctx.roundRect(-L.cardW/2, -L.cardH/2, L.cardW, L.cardH, 20);
+  const g = ctx.createLinearGradient(0, -L.cardH/2, 0, L.cardH/2);
+  g.addColorStop(0, "#fffdf4");
+  g.addColorStop(1, "#f2dfb6");
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.strokeStyle = "rgba(180,140,90,.55)";
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(255,255,255,.85)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(-L.cardW/2 + 3, -L.cardH/2 + 3, L.cardW - 6, L.cardH - 6, 17);
+  ctx.stroke();
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const isExpr = c.display && c.display.length > 2;
+  ctx.font = `950 ${isExpr ? L.cardFont*0.7 : L.cardFont}px ui-rounded,"Trebuchet MS",system-ui,sans-serif`;
+  ctx.fillStyle = "rgba(180,130,80,.32)";
+  ctx.fillText(c.display, 0, 4);
+  const tg = ctx.createLinearGradient(0, -22, 0, 22);
+  tg.addColorStop(0, "#3a556e");
+  tg.addColorStop(1, "#17324d");
+  ctx.fillStyle = tg;
+  ctx.fillText(c.display, 0, 2);
+
+  if (state.drag === c){
+    ctx.strokeStyle = "#ffd85f";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.roundRect(-L.cardW/2 - 2, -L.cardH/2 - 2, L.cardW + 4, L.cardH + 4, 22);
+    ctx.stroke();
+  }
   ctx.restore();
 }
 
 function drawCards(){
-  const L = layout(), t = performance.now() / 1000;
-  cards.forEach(c => {
-    if (c.hidden) return;
-    const bob = c.state === "idle" ? Math.sin(t * 1.8 + c.seed) * 2 : 0;
-    const shake = c.shake > 0 ? Math.sin(c.shake * 60) * 6 : 0;
-    ctx.save();
-    ctx.translate(X(c.x + shake), Y(c.y + bob));
-    ctx.scale(c.scale, c.scale);
-
-    ctx.fillStyle = "rgba(20,10,0,.27)";
-    ctx.beginPath();
-    ctx.ellipse(0, L.cardH / 2 + 8, L.cardW * .42, 9, 0, 0, TAU);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.roundRect(-L.cardW / 2, -L.cardH / 2, L.cardW, L.cardH, 20);
-    const g = ctx.createLinearGradient(0, -L.cardH / 2, 0, L.cardH / 2);
-    g.addColorStop(0, "#fffdf4");
-    g.addColorStop(1, "#f2dfb6");
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.strokeStyle = "rgba(180,140,90,.55)";
-    ctx.lineWidth = 1.8;
-    ctx.stroke();
-
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = `950 ${L.cardFont}px ui-rounded,"Trebuchet MS",system-ui,sans-serif`;
-    ctx.fillStyle = "#17324d";
-    ctx.fillText(c.value, 0, 2);
-
-    if (state.drag === c){
-      ctx.strokeStyle = "#ffd85f";
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.roundRect(-L.cardW / 2 - 1, -L.cardH / 2 - 1, L.cardW + 2, L.cardH + 2, 21);
-      ctx.stroke();
-    }
-    ctx.restore();
-  });
+  for (const c of cards){
+    if (c === state.drag) continue;
+    if (c.hidden) continue;
+    drawCard(c);
+  }
+  if (state.drag && !state.drag.hidden) drawCard(state.drag);
 }
-
 function drawParticles(){
   particles.forEach(p => {
     ctx.save();
-    ctx.globalAlpha = clamp(p.life / p.max, 0, 1);
+    ctx.globalAlpha = clamp(p.life/p.max, 0, 1);
     ctx.translate(X(p.x), Y(p.y));
     ctx.rotate(p.rot);
     ctx.fillStyle = p.color;
@@ -886,10 +1706,13 @@ function drawParticles(){
   });
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  HIT TESTS
+// ═══════════════════════════════════════════════════════════════════
 function hitCard(x, y){
   for (let i = cards.length - 1; i >= 0; i--){
     const c = cards[i];
-    if (!c.hidden && Math.abs(x - c.x) < c.w / 2 && Math.abs(y - c.y) < c.h / 2) return c;
+    if (!c.hidden && Math.abs(x - c.x) < c.w/2 && Math.abs(y - c.y) < c.h/2) return c;
   }
   return null;
 }
@@ -899,6 +1722,9 @@ function inBridge(x, y){
          y > L.groundY - 105 && y < L.groundY + L.deck + 75;
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  GAME ACTIONS
+// ═══════════════════════════════════════════════════════════════════
 function returnCard(c){
   c.state = "return";
   c.from = { x:c.x, y:c.y };
@@ -909,20 +1735,36 @@ function submit(c){
   if (state.phase !== "READY" && state.phase !== "DRAG") return;
   const q = levels[state.level];
   state.attempts++;
+  state.sessionAttempts++;
 
-  if (c.value !== q.ans){
+  const correct = q.type === "compare" ? c.label === q.ans : c.value === q.ans;
+
+  if (!correct){
     c.shake = .35;
     AudioFX.wrong();
     returnCard(c);
     state.phase = "READY";
+    state.consecutiveCorrect = 0;
+    // 2nd wrong → help visualization
+    if (state.attempts >= 2 && !state.helpShown){
+      state.helpShown = true;
+      AudioFX.help();
+      AudioFX.narrate("Try counting the dots");
+    }
     return;
   }
 
   AudioFX.drop();
+  state.sessionCorrect++;
+  // log concept for parent view
+  const tag = conceptTag(q);
+  state.sessionConcepts[tag] = (state.sessionConcepts[tag] || 0) + 1;
+
   c.state = "fly"; c.t = 0;
   c.from = { x:c.x, y:c.y };
   const L = layout();
-  c.to = { x:(L.bridgeX1 + L.bridgeX2) / 2, y:L.groundY };
+  c.to = { x:(L.bridgeX1 + L.bridgeX2)/2, y:L.groundY };
+  cards.forEach(other => { if (other !== c) other.fadeTarget = 0; });
 
   state.phase = "BUILDING";
   state.buildTimer = 0;
@@ -930,30 +1772,138 @@ function submit(c){
 
   setTimeout(() => {
     if (token !== state.transitionToken || state.phase !== "BUILDING") return;
-    planks.forEach((p, i) => { p.state = "falling"; p.delay = i * .11; });
+    planks.forEach((p, i) => { p.state = "falling"; p.delay = i*.11; });
   }, 360);
 }
 
-function next(){
+function afterLevel(){
+  const justFinishedSession = (state.level + 1) % 5 === 0;
   if (state.level < levels.length - 1){
     state.level++;
     save.level = Math.max(save.level, state.level);
     persist();
+    if (justFinishedSession){
+      // session complete
+      state.sessionStarsEarned = state.sessionStarsEarned || 0;
+      save.sessions++;
+      save.log.push({
+        date: Date.now(),
+        startLevel: state.sessionStartLevel,
+        endLevel: state.level,
+        correct: state.sessionCorrect,
+        attempts: state.sessionAttempts,
+        stars: state.sessionStarsEarned,
+        concepts: { ...state.sessionConcepts }
+      });
+      if (save.log.length > 30) save.log = save.log.slice(-30);
+      persist();
+      showSessionSummary();
+      return;
+    }
     state.phase = "READY";
     state.drag = null;
     state.transitionToken++;
     resetPlanks();
     initLevel();
+    AudioFX.startAmbient(WORLDS[levels[state.level].w].amb);
     return;
   }
   state.phase = "FINISH";
   document.getElementById("finalStars").textContent = save.stars;
   document.getElementById("finishText").textContent =
-    `You crossed all five worlds and completed all ${levels.length} levels.`;
+    `You crossed all five worlds and built ${save.bridges} bridges.`;
   document.getElementById("finish").classList.remove("hidden");
 }
 
-// ─── INPUT ───
+function startSession(){
+  state.sessionStartLevel = state.level;
+  state.sessionStartTime = Date.now();
+  state.sessionCorrect = 0;
+  state.sessionStarsEarned = 0;
+  state.sessionAttempts = 0;
+  state.sessionConcepts = {};
+  state.phase = "READY";
+  state.drag = null;
+  state.transitionToken++;
+  resetPlanks();
+  initLevel();
+  const q = levels[state.level];
+  AudioFX.startAmbient(WORLDS[q.w].amb);
+}
+
+function showSessionSummary(){
+  const secs = Math.round((Date.now() - state.sessionStartTime)/1000);
+  document.getElementById("sumCorrect").textContent = state.sessionCorrect;
+  document.getElementById("sumStars").textContent = state.sessionStarsEarned;
+  document.getElementById("sumTime").textContent = secs + "s";
+  const c = state.sessionConcepts;
+  const conceptText = Object.keys(c).map(k => `${k} (${c[k]})`).join(" · ");
+  document.getElementById("sumConcepts").textContent = conceptText;
+  document.getElementById("sessionSummary").classList.remove("hidden");
+  state.phase = "SUMMARY";
+}
+
+function backToVillage(){
+  document.getElementById("sessionSummary").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+  updateHomeScreen();
+  state.phase = "HOME";
+  AudioFX.stopAmbient();
+}
+
+function updateHomeScreen(){
+  const q = levels[state.level] || levels[0];
+  const w = WORLDS[q.w];
+  document.getElementById("homeWorld").textContent = `${w.icon} ${w.name}`;
+  document.getElementById("homeStars").textContent = save.stars;
+  document.getElementById("homeBridges").textContent = save.bridges;
+  document.getElementById("homeSessions").textContent = save.sessions;
+  document.getElementById("homeTitle").textContent =
+    save.bridges === 0 ? "The village is empty" : "The village grows";
+  document.getElementById("homeText").innerHTML = save.bridges === 0
+    ? `Help <b>Pip</b> cross bridges to build the village.`
+    : `You've built <b>${save.bridges}</b> bridge${save.bridges===1?"":"s"}. Every one adds to the village.`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  PARENT VIEW
+// ═══════════════════════════════════════════════════════════════════
+function showParentView(){
+  const log = save.log || [];
+  const totalCorrect = log.reduce((s, l) => s + (l.correct||0), 0);
+  const totalAttempts = log.reduce((s, l) => s + (l.attempts||0), 0);
+  const accuracy = totalAttempts ? Math.round(totalCorrect/totalAttempts*100) : 0;
+  const conceptTotals = {};
+  log.forEach(l => {
+    for (const k in (l.concepts||{})) conceptTotals[k] = (conceptTotals[k]||0) + l.concepts[k];
+  });
+  const conceptList = Object.entries(conceptTotals)
+    .sort((a,b) => b[1] - a[1])
+    .map(([k,v]) => `<li><b>${k}</b> — ${v} correct</li>`)
+    .join("");
+
+  let body = `<p style="margin:0 0 12px"><b>${save.name || "Your child"}</b> has built <b>${save.bridges}</b> bridges across <b>${save.sessions}</b> sessions.</p>`;
+  body += `<p style="margin:0 0 12px">Overall accuracy: <b>${accuracy}%</b> (${totalCorrect} of ${totalAttempts} attempts).</p>`;
+  if (conceptList){
+    body += `<p style="margin:0 0 6px"><b>Concepts practiced</b></p><ul style="margin:0 0 12px;padding-left:20px;color:#17314b">${conceptList}</ul>`;
+  }
+  if (log.length){
+    body += `<p style="margin:12px 0 6px"><b>Recent sessions</b></p>`;
+    body += log.slice(-5).reverse().map(l => {
+      const d = new Date(l.date);
+      const when = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;
+      return `<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px">${when} — ${l.correct}/${l.attempts} correct, ${l.stars} stars</div>`;
+    }).join("");
+  } else {
+    body += `<p style="color:#718391;margin-top:12px">No sessions recorded yet.</p>`;
+  }
+  document.getElementById("parentBody").innerHTML = body;
+  document.getElementById("parentView").classList.remove("hidden");
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  INPUT
+// ═══════════════════════════════════════════════════════════════════
 let press = { id:null, x:0, y:0, t:0, card:null, dragging:false, offsetX:0, offsetY:0 };
 
 canvas.addEventListener("pointerdown", e => {
@@ -968,7 +1918,6 @@ canvas.addEventListener("pointerdown", e => {
             card:c, dragging:false, offsetX:0, offsetY:0 };
   canvas.setPointerCapture?.(e.pointerId);
 });
-
 canvas.addEventListener("pointermove", e => {
   if (press.id !== e.pointerId) return;
   const dx = e.clientX - press.x, dy = e.clientY - press.y;
@@ -987,16 +1936,13 @@ canvas.addEventListener("pointermove", e => {
   press.card.x = p.x - press.offsetX;
   press.card.y = p.y - press.offsetY;
 });
-
 canvas.addEventListener("pointerup", e => {
   if (press.id !== e.pointerId) return;
   const c = press.card;
   const dragged = press.dragging;
   const p = pos(e);
   press = { id:null, x:0, y:0, t:0, card:null, dragging:false, offsetX:0, offsetY:0 };
-
   if (!dragged){ submit(c); return; }
-
   state.drag = null;
   if (inBridge(p.x, p.y)){
     submit(c);
@@ -1006,7 +1952,6 @@ canvas.addEventListener("pointerup", e => {
     state.phase = "READY";
   }
 });
-
 canvas.addEventListener("pointercancel", e => {
   if (press.id !== e.pointerId) return;
   const c = press.card;
@@ -1016,68 +1961,191 @@ canvas.addEventListener("pointercancel", e => {
 });
 canvas.addEventListener("contextmenu", e => e.preventDefault());
 
-// ─── SHELL BUTTONS ───
-function startGame(){
-  AudioFX.wake(); AudioFX.start();
-  document.getElementById("start").classList.add("hidden");
-  state.phase = "READY";
-  document.getElementById("tip").classList.remove("gone");
-  setTimeout(() => document.getElementById("tip").classList.add("gone"), 6000);
+// ═══════════════════════════════════════════════════════════════════
+//  SHELL — ONBOARDING
+// ═══════════════════════════════════════════════════════════════════
+function renderColorSwatches(){
+  const row = document.getElementById("colorRow");
+  row.innerHTML = "";
+  BRIDGE_COLORS.forEach(c => {
+    const s = document.createElement("button");
+    s.className = "swatch" + (c === save.color ? " selected" : "");
+    s.style.background = c;
+    s.setAttribute("aria-label", "Color " + c);
+    s.onclick = () => {
+      save.color = c;
+      persist();
+      renderColorSwatches();
+    };
+    row.appendChild(s);
+  });
 }
-document.getElementById("startBtn").onclick = startGame;
 
-document.getElementById("resetBtn").onclick = () => {
-  if (!confirm("Reset all 100 levels and stars?")) return;
-  save = { level:0, stars:0, best:Array(100).fill(0) };
+document.getElementById("onboardBtn").onclick = () => {
+  const name = (document.getElementById("nameInput").value || "").trim().slice(0,12);
+  save.name = name;
   persist();
-  state.level = 0;
-  state.phase = "READY";
-  state.transitionToken++;
-  resetPlanks();
-  initLevel();
-  document.getElementById("start").classList.add("hidden");
+  AudioFX.wake();
   AudioFX.start();
+  document.getElementById("onboard").classList.add("hidden");
+  state.phase = "HOME";
+  updateHomeScreen();
+  document.getElementById("home").classList.remove("hidden");
 };
 
-document.getElementById("againBtn").onclick = () => {
-  save = { level:0, stars:0, best:Array(100).fill(0) };
-  persist();
-  state.level = 0;
-  state.phase = "READY";
-  state.transitionToken++;
-  resetPlanks();
-  initLevel();
-  document.getElementById("finish").classList.add("hidden");
-  AudioFX.start();
+document.getElementById("settingsFromOnboard").onclick = () => {
+  document.getElementById("onboard").classList.add("hidden");
+  document.getElementById("settingsPanel").classList.remove("hidden");
 };
 
+// ═══════════════════════════════════════════════════════════════════
+//  SHELL — HOME
+// ═══════════════════════════════════════════════════════════════════
+document.getElementById("homePlay").onclick = () => {
+  document.getElementById("home").classList.add("hidden");
+  AudioFX.start();
+  // If we're at a session boundary already, or first ever, show intro
+  const atBoundary = state.level % 5 === 0;
+  if (atBoundary){
+    document.getElementById("sessionIntro").classList.remove("hidden");
+    state.phase = "SESSION_INTRO";
+  } else {
+    startSession();
+  }
+};
+
+document.getElementById("sessionGo").onclick = () => {
+  document.getElementById("sessionIntro").classList.add("hidden");
+  startSession();
+};
+
+document.getElementById("summaryHome").onclick = backToVillage;
+document.getElementById("summaryDetails").onclick = () => {
+  backToVillage();
+  showParentView();
+};
+
+document.getElementById("homeSettings").onclick = () => {
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("settingsPanel").classList.remove("hidden");
+};
+document.getElementById("homeParent").onclick = showParentView;
+document.getElementById("parentClose").onclick = () => {
+  document.getElementById("parentView").classList.add("hidden");
+  if (state.phase === "HOME") document.getElementById("home").classList.remove("hidden");
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  SHELL — PAUSE, SETTINGS, RESET, FINISH
+// ═══════════════════════════════════════════════════════════════════
 document.getElementById("pause").onclick = () => {
   if (state.phase === "READY" || state.phase === "DRAG"){
     state.phase = "PAUSED";
     document.getElementById("pausePanel").classList.remove("hidden");
   }
 };
-
 document.getElementById("resumeBtn").onclick = () => {
   state.phase = "READY";
   state.drag = null;
   document.getElementById("pausePanel").classList.add("hidden");
 };
+document.getElementById("pauseSettings").onclick = () => {
+  document.getElementById("pausePanel").classList.add("hidden");
+  document.getElementById("settingsPanel").classList.remove("hidden");
+};
 
 document.getElementById("sound").onclick = () => {
   AudioFX.wake();
-  document.getElementById("sound").textContent = AudioFX.toggle() ? "🔇" : "🔊";
+  const muted = AudioFX.toggle();
+  document.getElementById("sound").textContent = muted ? "🔇" : "🔊";
 };
 
-// ─── LOOP ───
+document.getElementById("againBtn").onclick = () => {
+  // restart from level 0 but keep name/color/village
+  state.level = 0;
+  save.level = 0;
+  save.bridges = 0;
+  save.sessions = 0;
+  save.log = [];
+  persist();
+  document.getElementById("finish").classList.add("hidden");
+  state.phase = "HOME";
+  updateHomeScreen();
+  document.getElementById("home").classList.remove("hidden");
+};
+
+// Settings
+function bindToggle(id, key, onChange){
+  const btn = document.getElementById(id);
+  btn.classList.toggle("on", !!save.settings[key]);
+  btn.onclick = () => {
+    save.settings[key] = !save.settings[key];
+    btn.classList.toggle("on", save.settings[key]);
+    persist();
+    if (onChange) onChange(save.settings[key]);
+  };
+}
+bindToggle("setNarration", "narration");
+bindToggle("setReduced", "reduced");
+bindToggle("setContrast", "contrast", v => {
+  document.body.classList.toggle("contrast", v);
+});
+bindToggle("setBigText", "bigText", v => {
+  document.body.classList.toggle("bigtext", v);
+});
+bindToggle("setSlow", "slow");
+
+const volSlider = document.getElementById("setVolume");
+volSlider.value = save.settings.volume;
+volSlider.oninput = () => {
+  save.settings.volume = +volSlider.value;
+  persist();
+  AudioFX.setVolume(save.settings.volume);
+};
+
+document.getElementById("settingsClose").onclick = () => {
+  document.getElementById("settingsPanel").classList.add("hidden");
+  // return to whichever screen we were on
+  if (state.phase === "ONBOARD") document.getElementById("onboard").classList.remove("hidden");
+  else if (state.phase === "HOME") document.getElementById("home").classList.remove("hidden");
+  else if (state.phase === "PAUSED") document.getElementById("pausePanel").classList.remove("hidden");
+};
+
+// Apply saved settings at boot
+document.body.classList.toggle("contrast", save.settings.contrast);
+document.body.classList.toggle("bigtext", save.settings.bigText);
+
+// ═══════════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════════
+resize();
+renderColorSwatches();
+document.getElementById("nameInput").value = save.name || "";
+
+// If already onboarded, go straight to home; else show onboarding
+if (save.name){
+  state.phase = "HOME";
+  document.getElementById("onboard").classList.add("hidden");
+  updateHomeScreen();
+  document.getElementById("home").classList.remove("hidden");
+} else {
+  state.phase = "ONBOARD";
+}
+
+// Try to load an initial level for scene rendering
+try { initLevel(); } catch(e){}
+
+last = performance.now() / 1000;
 function frame(t){
   const now = t / 1000;
   const dt = Math.min(.05, Math.max(0, now - last));
   last = now;
-  if (!["START", "PAUSED", "FINISH"].includes(state.phase)) update(dt);
+  const activePhases = ["READY","DRAG","BUILDING","CROSSING","CHEERING","SESSION_INTRO"];
+  if (activePhases.includes(state.phase)) update(dt);
   draw();
   requestAnimationFrame(frame);
 }
+requestAnimationFrame(frame);
 
 addEventListener("resize", resize, { passive:true });
 addEventListener("orientationchange", () => setTimeout(resize, 120), { passive:true });
@@ -1085,11 +2153,6 @@ if (window.visualViewport){
   visualViewport.addEventListener("resize", resize, { passive:true });
   visualViewport.addEventListener("scroll", resize, { passive:true });
 }
-
-// ─── BOOT ───
-resize();
-initLevel();
-requestAnimationFrame(frame);
 
 })();
 </script>
