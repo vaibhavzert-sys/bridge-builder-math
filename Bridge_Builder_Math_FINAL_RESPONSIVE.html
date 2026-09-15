@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Bridge Builder Math</title>
+<style>
+:root{--ink:#18324b;--sky:#bfeaff;--cream:#fffaf0;--wood:#b97842;--wood2:#dfa36b;--water:#55a9d1;--grass:#79bf83}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:var(--sky)}
+body{touch-action:none;overscroll-behavior:none}
+button{font:inherit;border:0}
+#app{position:relative;width:100vw;height:100dvh;min-height:520px;overflow:hidden;isolation:isolate}
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,#a9e3ff 0%,#dff5ff 56%,#f6dfb0 100%)}
+.sun{position:absolute;width:clamp(72px,18vw,118px);height:clamp(72px,18vw,118px);right:7%;top:8%;border-radius:50%;background:#ffe49a;box-shadow:0 0 45px #fff2b5}
+.cloud{position:absolute;background:#fff9;border-radius:999px;opacity:.78}.c1{width:170px;height:38px;left:5%;top:16%}.c1:before,.c1:after,.c2:before,.c2:after{content:"";position:absolute;background:inherit;border-radius:50%}.c1:before{width:58px;height:58px;left:25px;top:-27px}.c1:after{width:78px;height:78px;left:76px;top:-39px}.c2{width:130px;height:31px;right:12%;top:27%}.c2:before{width:52px;height:52px;left:18px;top:-25px}.c2:after{width:62px;height:62px;right:22px;top:-30px}
+.hills{position:absolute;left:-8%;right:-8%;bottom:25%;height:32%;background:#7bc38a;border-radius:50% 50% 0 0/100% 100% 0 0;box-shadow:inset 0 18px #94d39e}.hills:after{content:"";position:absolute;left:42%;top:3%;width:70%;height:110%;background:#69b27d;border-radius:50% 50% 0 0/100% 100% 0 0;opacity:.8}
+.ground{position:absolute;left:0;right:0;bottom:0;height:28%;background:#71b778}.ground:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 34px,#66aa70 35px 37px);opacity:.3}
+.world{position:absolute;inset:0;z-index:2}
+.bank{position:absolute;bottom:22%;width:31%;height:19%;background:linear-gradient(#c18c59,#ad7548);border-radius:42% 42% 0 0;box-shadow:inset 0 9px #8d623f}.bank.left{left:-3%}.bank.right{right:-3%}.bank:after{content:"";position:absolute;inset:22% 0 0;background:repeating-linear-gradient(115deg,transparent 0 16px,#a06d48 17px 19px);opacity:.42}
+.ravine{position:absolute;left:23%;right:23%;bottom:0;height:39%;background:linear-gradient(#66b6d8,#4795bf);border-radius:50% 50% 0 0/18% 18% 0 0;box-shadow:inset 0 10px #82cbe3}
+.bridge-area{position:absolute;left:23%;right:23%;bottom:40%;height:12%;display:flex;align-items:center;justify-content:center;gap:clamp(5px,1.5vw,9px);z-index:5}
+.slot{width:16%;height:56%;border:3px dashed #815d3e;border-radius:11px;background:#fff4;transition:transform .2s,background .2s,box-shadow .2s}.slot.filled{border-style:solid;background:linear-gradient(#e0a66b,#b96f39);box-shadow:0 6px 0 #8d552f;transform:translateY(-3px)}
+.char{position:absolute;left:7%;bottom:42%;width:66px;height:105px;z-index:7;transition:left 1.2s cubic-bezier(.2,.9,.25,1)}.char .head{position:absolute;left:16px;top:0;width:42px;height:42px;border-radius:50%;background:#f2bd91;border:3px solid #b96f55}.char .hair{position:absolute;left:11px;top:-2px;width:52px;height:22px;border-radius:50% 55% 40% 45%;background:#49342e}.char .body{position:absolute;left:12px;top:39px;width:46px;height:49px;border-radius:18px 18px 12px 12px;background:#ff7b7b}.char .leg{position:absolute;top:83px;width:15px;height:25px;border-radius:8px;background:#355b86}.char .l{left:17px}.char .r{left:38px}.char .eye{position:absolute;top:17px;width:5px;height:7px;border-radius:50%;background:#17324d}.char .e1{left:27px}.char .e2{left:42px}.char.walk{animation:bob .32s infinite alternate}@keyframes bob{to{transform:translateY(-4px)}}
+.hud{position:absolute;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;z-index:20;display:flex;justify-content:space-between;align-items:center}.logo{padding:9px 13px;border-radius:17px;background:#fffffff2;box-shadow:0 6px 20px #31566b22;font-weight:950;font-size:clamp(12px,3.5vw,16px)}.level{padding:9px 13px;border-radius:17px;background:#18324be8;color:white;font-weight:900;font-size:clamp(11px,3.2vw,14px)}
+.challenge{position:absolute;top:10.5%;left:50%;transform:translateX(-50%);z-index:12;width:min(640px,94vw);display:flex;flex-direction:column;align-items:center}.equation{padding:8px 20px;border-radius:24px;background:#fffffff2;box-shadow:0 10px 30px #31566b22;font-size:clamp(32px,8vw,50px);font-weight:950;letter-spacing:2px;line-height:1.1}.choices{display:flex;justify-content:center;gap:clamp(10px,3vw,18px);margin-top:18px}.choice{width:clamp(82px,22vw,118px);height:clamp(68px,18vw,92px);border-radius:22px;background:var(--cream);box-shadow:0 8px 0 #d5c5a5,0 13px 28px #31566b25;color:#24435e;font-size:clamp(30px,7vw,40px);font-weight:950;touch-action:none;user-select:none;cursor:grab;transition:transform .12s,box-shadow .12s}.choice.selected{transform:translateY(-5px) scale(1.04);box-shadow:0 4px 0 #d5c5a5,0 13px 28px #31566b25}.choice.dragging{opacity:.35}
+.drop-pulse{animation:pulse .65s ease-in-out 2}@keyframes pulse{50%{transform:scale(1.04)}}
+#toast{position:absolute;left:50%;transform:translateX(-50%);bottom:8%;z-index:30;padding:11px 17px;border-radius:16px;background:#18324bea;color:white;font-weight:850;opacity:0;pointer-events:none;transition:opacity .18s;white-space:nowrap}.show{opacity:1!important}
+.tester{display:none;position:absolute;top:max(55px,calc(env(safe-area-inset-top) + 48px));right:12px;z-index:40;gap:5px}.tester-mode .tester{display:flex}.tag{font-size:10px;font-weight:900;padding:4px 7px;border-radius:8px;background:#fff;color:#18324b}.tag.ok{background:#72bb82;color:#fff}.tag.fail{background:#df6b70;color:#fff}.tag.hit{background:#ffd36a}
+@media(max-width:600px){.challenge{top:11.5%}.ravine{left:20%;right:20%;height:40%}.bridge-area{left:20%;right:20%;bottom:39%;height:12%}.bank{height:20%;bottom:22%}.char{left:5%;bottom:41%;transform:scale(.88);transform-origin:bottom left}.logo{padding:8px 11px}.level{padding:8px 11px}.choices{margin-top:15px}.choice{border-radius:19px}.ground{height:27%}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="sky"></div><div class="sun"></div><div class="cloud c1"></div><div class="cloud c2"></div><div class="hills"></div><div class="ground"></div>
+  <div class="world"><div class="bank left"></div><div class="bank right"></div><div class="ravine"></div><div id="bridge" class="bridge-area"></div><div id="char" class="char"><div class="hair"></div><div class="head"><i class="eye e1"></i><i class="eye e2"></i></div><div class="body"></div><div class="leg l"></div><div class="leg r"></div></div></div>
+  <div class="hud"><div class="logo">🌉 Bridge Builder</div><div class="level" id="taskPill">Challenge 1</div></div>
+  <div class="challenge"><div class="equation" id="equation">3 + 4 = ?</div><div class="choices" id="choices"></div></div>
+  <div class="tester"><span id="tG2" class="tag">G2:—</span><span id="tG3" class="tag">G3:—</span></div>
+  <div id="toast">Try another piece.</div>
+</div>
+<script>
+(()=>{
+'use strict';
+if(new URLSearchParams(location.search).get('tester')==='1')document.body.classList.add('tester-mode');
+const tasks=[{eq:'3 + 4 = ?',choices:[6,7,8],answer:7},{eq:'5 + 3 = ?',choices:[7,8,9],answer:8}];
+let taskIndex=0,attempts=0,built=false,gate2MathFail=false,gate3Positive=false,gate3WindowOpen=false,gate3Timer=null;
+const $=id=>document.getElementById(id),bridge=$('bridge'),choices=$('choices'),equation=$('equation'),char=$('char'),toast=$('toast'),tG2=$('tG2'),tG3=$('tG3');
+function tester(){if(taskIndex===0){tG2.textContent=gate2MathFail?'G2:FAIL':built?'G2:PASS':'G2:—';tG2.className='tag '+(gate2MathFail?'fail':built?'ok':'')}else{tG2.textContent='G2:—';tG2.className='tag'}tG3.textContent=gate3Positive?'G3:VOL':gate3WindowOpen?'G3:OPEN':taskIndex===1?'G3:ASK':'G3:—';tG3.className='tag '+(gate3Positive?'ok':gate3WindowOpen?'hit':'')}
+function render(i){taskIndex=i;attempts=0;built=false;gate2MathFail=false;gate3Positive=false;gate3WindowOpen=false;if(gate3Timer)clearTimeout(gate3Timer);equation.textContent=tasks[i].eq;$('taskPill').textContent='Challenge '+(i+1);bridge.innerHTML='';for(let k=0;k<4;k++){let s=document.createElement('div');s.className='slot';bridge.appendChild(s)}choices.innerHTML='';tasks[i].choices.forEach(n=>{let b=document.createElement('button');b.className='choice';b.textContent=n;b.dataset.value=n;wire(b,n);choices.appendChild(b)});char.classList.remove('walk');char.style.left='7%';tester()}
+function say(m){toast.textContent=m;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),800)}
+function placeAttempt(value){if(built)return;attempts++;if(taskIndex===0)gate2MathFail=attempts>=3;tester();if(value!==tasks[taskIndex].answer){say('Try another piece.');return}build()}
+function build(){if(built)return;built=true;tester();[...bridge.children].forEach((s,i)=>setTimeout(()=>s.classList.add('filled'),i*95));setTimeout(()=>{char.classList.add('walk');char.style.left='82%'},380);setTimeout(()=>{char.classList.remove('walk');if(taskIndex===0){render(1);gate3WindowOpen=true;tester();gate3Timer=setTimeout(()=>{gate3WindowOpen=false;tester()},3000)}else{render(0)}},1700)}
+function wire(el,value){let dragging=false,ghost=null,selected=false;
+const clear=()=>{el.classList.remove('selected');selected=false};
+const down=e=>{if(built)return;e.preventDefault();dragging=true;el.classList.add('dragging');try{el.setPointerCapture(e.pointerId)}catch(_){}ghost=el.cloneNode(true);ghost.style.position='fixed';ghost.style.left='0';ghost.style.top='0';ghost.style.width=el.offsetWidth+'px';ghost.style.height=el.offsetHeight+'px';ghost.style.margin='0';ghost.style.zIndex='9999';ghost.style.pointerEvents='none';document.body.appendChild(ghost);move(e)};
+const move=e=>{if(!dragging)return;e.preventDefault();ghost.style.transform=`translate(${e.clientX-ghost.offsetWidth/2}px,${e.clientY-ghost.offsetHeight/2}px) scale(1.06)`};
+const finish=e=>{if(!dragging)return;dragging=false;el.classList.remove('dragging');let r=bridge.getBoundingClientRect();let inside=e.clientX>=r.left-35&&e.clientX<=r.right+35&&e.clientY>=r.top-45&&e.clientY<=r.bottom+45;ghost?.remove();ghost=null;if(inside){clear();placeAttempt(value)}else{el.classList.add('selected');selected=true;bridge.classList.add('drop-pulse');setTimeout(()=>bridge.classList.remove('drop-pulse'),700)}};
+el.addEventListener('pointerdown',down);el.addEventListener('pointermove',move);el.addEventListener('pointerup',finish);el.addEventListener('pointercancel',finish);
+// Tap fallback: tap an answer, then tap the bridge.
+el.addEventListener('click',e=>{if(dragging)return;if(selected){clear()}else{el.classList.add('selected');selected=true}});
+bridge.addEventListener('pointerdown',e=>{if(built)return;let picked=document.querySelector('.choice.selected');if(picked){e.preventDefault();let value=Number(picked.dataset.value);picked.classList.remove('selected');placeAttempt(value)}});
+}
+render(0);
+})();
+</script>
+</body>
+</html>
