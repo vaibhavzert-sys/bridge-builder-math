@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Bridge Builder Math — Phase 1 Production Prototype</title>
+<style>
+:root{--ink:#17324d;--cream:#fff9ed;--sky:#bde8ff;--green:#79c98b;--wood:#b97942;--wood2:#d99b5f;--gold:#ffd36a;--danger:#e56b6f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:var(--sky)}
+body{touch-action:none}
+button{font:inherit;border:0}
+#app{position:relative;width:100vw;height:100vh;min-height:520px;overflow:hidden}
+.sky{position:absolute;inset:0;background:linear-gradient(#aee5ff 0%,#dff5ff 58%,#f7dfae 100%)}
+.sun{position:absolute;width:110px;height:110px;border-radius:50%;right:8vw;top:8vh;background:#ffe49a;box-shadow:0 0 55px #fff1ba}
+.cloud{position:absolute;background:#fff9;border-radius:999px;filter:blur(.2px);opacity:.85}
+.c1{width:180px;height:42px;left:7%;top:15%}.c1:before,.c1:after,.c2:before,.c2:after{content:"";position:absolute;background:inherit;border-radius:50%}
+.c1:before{width:62px;height:62px;left:25px;top:-28px}.c1:after{width:82px;height:82px;left:76px;top:-40px}
+.c2{width:140px;height:34px;right:15%;top:26%}.c2:before{width:54px;height:54px;left:18px;top:-25px}.c2:after{width:64px;height:64px;right:25px;top:-31px}
+.hills{position:absolute;left:-5%;right:-5%;bottom:25%;height:30%;background:#78bd88;border-radius:50% 50% 0 0/100% 100% 0 0;box-shadow:inset 0 20px #91d29b}
+.hills:after{content:"";position:absolute;left:48%;top:-5%;width:65%;height:110%;background:#66ae7b;border-radius:50% 50% 0 0/100% 100% 0 0;opacity:.8}
+.ground{position:absolute;left:0;right:0;bottom:0;height:30%;background:#72b878}
+.ground:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 38px,#68aa70 39px 41px);opacity:.35}
+.world{position:absolute;inset:0;z-index:2}
+.bank{position:absolute;bottom:24%;width:32%;height:18%;background:#b98555;border-radius:40% 40% 0 0;box-shadow:inset 0 10px #8d633f}
+.bank.left{left:-4%}.bank.right{right:-4%}
+.bank:after{content:"";position:absolute;inset:20% 0 0;background:repeating-linear-gradient(115deg,transparent 0 17px,#a36f48 18px 20px);opacity:.45}
+.ravine{position:absolute;left:25%;right:25%;bottom:0;height:39%;background:#4e9bc4;border-radius:50% 50% 0 0/25% 25% 0 0;box-shadow:inset 0 12px 0 #65b4d5}
+.bridge-area{position:absolute;left:25%;right:25%;bottom:38%;height:11%;display:flex;align-items:center;justify-content:center;gap:7px;z-index:4}
+.slot{width:14%;height:46%;border-radius:10px;border:3px dashed #8b633f;background:#ffffff33;transition:.25s}
+.slot.filled{border-style:solid;background:linear-gradient(#dba267,#ad6c39);box-shadow:0 5px 0 #89542e;transform:translateY(-3px)}
+.char{position:absolute;left:9%;bottom:42%;width:68px;height:105px;z-index:7;transition:left 1.25s cubic-bezier(.2,.9,.25,1)}
+.char .head{position:absolute;left:17px;top:0;width:42px;height:42px;border-radius:50%;background:#f2bd91;border:3px solid #b96f55}
+.char .hair{position:absolute;left:12px;top:-2px;width:51px;height:22px;border-radius:50% 55% 40% 45%;background:#49342e}
+.char .body{position:absolute;left:13px;top:39px;width:47px;height:49px;border-radius:18px 18px 12px 12px;background:#ff7d7d}
+.char .leg{position:absolute;top:83px;width:15px;height:25px;border-radius:8px;background:#355b86}.char .l{left:18px}.char .r{left:39px}
+.char .eye{position:absolute;top:17px;width:5px;height:7px;border-radius:50%;background:#17324d}.char .e1{left:27px}.char .e2{left:43px}
+.char.walk{animation:bob .32s infinite alternate}
+@keyframes bob{to{transform:translateY(-4px)}}
+.topbar{position:absolute;top:max(14px,env(safe-area-inset-top));left:14px;right:14px;z-index:20;display:flex;justify-content:space-between;align-items:center}
+.brand{padding:10px 15px;border-radius:18px;background:#fffffff0;box-shadow:0 6px 20px #38607822;font-weight:900;letter-spacing:.3px}
+.pill{padding:10px 14px;border-radius:18px;background:#17324dcc;color:white;font-weight:800}
+.panel{position:absolute;left:50%;transform:translateX(-50%);top:12%;z-index:15;width:min(620px,92vw);text-align:center}
+.math{display:inline-block;padding:10px 22px;border-radius:24px;background:#fffffff2;box-shadow:0 10px 28px #34576a22;font-size:clamp(30px,6vw,48px);font-weight:950;letter-spacing:2px}
+.choices{display:flex;justify-content:center;gap:14px;margin-top:15px}
+.choice{width:clamp(76px,16vw,112px);height:clamp(62px,12vw,86px);border-radius:24px;background:#fffdf5;box-shadow:0 8px 0 #d7c7a7,0 12px 25px #31566b22;font-size:clamp(26px,5vw,38px);font-weight:950;color:#24425d;cursor:grab;user-select:none;touch-action:none;transition:transform .15s,box-shadow .15s}
+.choice:active{cursor:grabbing;transform:scale(1.06) translateY(-3px);box-shadow:0 5px 0 #d7c7a7,0 12px 25px #31566b22}
+.hintline{margin-top:10px;min-height:24px;font-weight:800;color:#34566c}
+.next{display:none;position:absolute;left:50%;transform:translateX(-50%);top:53%;z-index:18;padding:13px 22px;border-radius:18px;background:#fffdf5;box-shadow:0 7px 0 #d7c7a7;font-weight:900;cursor:pointer}
+.next.show{display:block}
+#toast{position:absolute;left:50%;transform:translateX(-50%);bottom:12%;z-index:30;padding:12px 18px;border-radius:18px;background:#17324de8;color:white;font-weight:850;opacity:0;pointer-events:none;transition:.25s}
+#toast.show{opacity:1}
+.gate3{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:#17324d66;backdrop-filter:blur(5px)}
+.gate3.show{display:flex}
+.card{width:min(470px,88vw);padding:30px;border-radius:30px;background:#fffaf0;box-shadow:0 20px 60px #17324d55;text-align:center}
+.card h2{margin:0 0 10px;font-size:28px}.card p{margin:0 0 22px;font-weight:700;color:#4b6578}
+.primary{padding:14px 24px;border-radius:18px;background:#17324d;color:white;font-weight:900;cursor:pointer}
+.debug{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+@media(max-width:600px){.panel{top:13%}.bank{height:20%}.ravine{left:22%;right:22%}.bridge-area{left:22%;right:22%;gap:4px}.char{left:6%;transform:scale(.82);transform-origin:bottom left}.choice{border-radius:19px}.brand{font-size:13px}.pill{font-size:12px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="sky"></div><div class="sun"></div><div class="cloud c1"></div><div class="cloud c2"></div>
+  <div class="hills"></div><div class="ground"></div>
+  <div class="world">
+    <div class="bank left"></div><div class="bank right"></div><div class="ravine"></div>
+    <div id="bridge" class="bridge-area"></div>
+    <div id="char" class="char"><div class="hair"></div><div class="head"><i class="eye e1"></i><i class="eye e2"></i></div><div class="body"></div><div class="leg l"></div><div class="leg r"></div></div>
+  </div>
+  <div class="topbar"><div class="brand">🌉 Bridge Builder Math</div><div class="pill" id="taskPill">Challenge 1</div></div>
+  <div class="panel">
+    <div class="math" id="equation">3 + 4 = ?</div>
+    <div class="choices" id="choices"></div>
+    <div class="hintline" id="status" aria-live="polite"></div>
+  </div>
+  <button id="next" class="next">Continue →</button>
+  <div id="toast">Try another block.</div>
+  <div class="debug" id="debug">attempts: 0</div>
+</div>
+<script>
+(() => {
+"use strict";
+const tasks=[
+ {eq:"3 + 4 = ?", choices:[6,7,8], answer:7},
+ {eq:"5 + 3 = ?", choices:[7,8,9], answer:8}
+];
+let taskIndex=0, attempts=0, built=false, task1Completed=false, gate2MathFail=false, gate3Positive=false, gate3WindowOpen=false;
+const $=id=>document.getElementById(id);
+const bridge=$("bridge"), choices=$("choices"), equation=$("equation"), status=$("status"), next=$("next"), char=$("char"), debug=$("debug"), gate3=$("gate3");
+
+function renderTask(i){
+ const t=tasks[i]; taskIndex=i; attempts=0; built=false;
+ equation.textContent=t.eq; $("taskPill").textContent="Challenge "+(i+1);
+ status.textContent=""; debug.textContent="attempts: 0"; next.classList.remove("show"); gate2MathFail=false; gate3Positive=false; gate3WindowOpen=false;
+ bridge.innerHTML="";
+ for(let k=0;k<4;k++){const s=document.createElement("div");s.className="slot";bridge.appendChild(s)}
+ choices.innerHTML="";
+ t.choices.forEach(n=>{
+   const b=document.createElement("button"); b.className="choice"; b.textContent=n; b.dataset.value=n;
+   attachDrag(b,n); choices.appendChild(b);
+ });
+ char.classList.remove("walk"); char.style.left="9%";
+}
+function showToast(msg){
+ const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),850);
+}
+function attachDrag(el,value){
+ let dragging=false, ghost=null, startX=0,startY=0;
+ const down=e=>{
+   if(built)return;
+   e.preventDefault();dragging=true;el.setPointerCapture?.(e.pointerId);
+   startX=e.clientX;startY=e.clientY;
+   el.style.transform="scale(1.08) translateY(-4px)";
+   ghost=el.cloneNode(true);ghost.style.position="fixed";ghost.style.zIndex=100;ghost.style.pointerEvents="none";ghost.style.width=el.getBoundingClientRect().width+"px";ghost.style.height=el.getBoundingClientRect().height+"px";document.body.appendChild(ghost);move(e);
+ };
+ const move=e=>{
+   if(!dragging)return;e.preventDefault();ghost.style.left=(e.clientX-ghost.offsetWidth/2)+"px";ghost.style.top=(e.clientY-ghost.offsetHeight/2)+"px";
+ };
+ const up=e=>{
+   if(!dragging)return;dragging=false;el.style.transform="";
+   const r=bridge.getBoundingClientRect();
+   const inside=e.clientX>=r.left-25&&e.clientX<=r.right+25&&e.clientY>=r.top-35&&e.clientY<=r.bottom+35;
+   ghost?.remove();ghost=null;
+   if(inside) attempt(value,el);
+ };
+ el.addEventListener("pointerdown",down);el.addEventListener("pointermove",move);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);
+}
+function attempt(value,el){
+ if(taskIndex===1 && gate3WindowOpen) gate3Positive=true;
+ attempts++; gate2MathFail = attempts >= 3; debug.textContent="attempts: "+attempts+(gate2MathFail?" • GATE2 FAIL":"");
+ if(value!==tasks[taskIndex].answer){
+   showToast("Try another piece.");
+   status.textContent="";
+   return;
+ }
+ buildBridge();
+}
+function buildBridge(){
+ if(built)return;built=true;
+ [...bridge.children].forEach((s,i)=>setTimeout(()=>s.classList.add("filled"),i*95));
+ status.textContent="";
+ setTimeout(()=>{char.classList.add("walk");char.style.left="82%";},420);
+ setTimeout(()=>{
+   if(taskIndex===0){
+     task1Completed=true;
+     next.textContent="Continue →";
+     next.classList.add("show");
+     next.onclick=()=>openGate3();
+   }else{
+     next.textContent="Play again →";next.classList.add("show");next.onclick=()=>renderTask(0);
+   }
+ },1550);
+}
+function openGate3(){
+ next.classList.remove("show");
+ gate3.classList.add("show");
+ let asked=false;
+ voluntary=false;
+ // Protocol: Task 2 visible, does not auto-start. Three-second observation.
+ setTimeout(()=>{
+   if(!voluntary){
+     $("gate3copy").textContent="Do you want to try another one?";
+     $("yes").textContent="Yes, another one!";
+     asked=true;
+   }
+ },3000);
+ // A genuine child-voluntary initiation is represented by touching the visible card/button
+ // before the 3s question. No moderator encouragement is embedded.
+ $("yes").onclick=()=>{voluntary=true;gate3.classList.remove("show");renderTask(1)};
+}
+renderTask(0);
+})();
+</script>
+</body>
+</html>
